@@ -1,20 +1,19 @@
 import { CustomButton } from "@/components/CustomButtom";
 import LogoBackground from "@/components/LogoBackground";
-
+import { ThemedSelectDropdown } from "@/components/ThemedSelectDropdown";
 import { ThemedText } from "@/components/ThemedText";
-import { ThemedInputText } from "@/components/ThemedTextInput";
 import { ThemedView } from "@/components/ThemedView";
 import { Entypo } from '@expo/vector-icons';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useNavigation, useRouter } from "expo-router";
-import { Button, GestureResponderEvent, Text, View } from "react-native";
-import { NativeStackScreenProps } from "react-native-screens/lib/typescript/native-stack/types";
+import { useRouter } from "expo-router";
+import { useState } from "react";
+import { GestureResponderEvent } from "react-native";
 
-export default function Index() {
+export default function FilialSelection() {
   const router = useRouter()
+  const [selectedFilial, setSelectedFilial] = useState<string>('1');
   function handlePress(event: GestureResponderEvent): void {
-    console.log("Login button pressed");
-    router.push('/filialSelection')
+    console.log("Enter button pressed, Selected filial: " + selectedFilial);
+    router.push('/home')
   }
 
   return (
@@ -32,7 +31,7 @@ export default function Index() {
           marginTop: '70%',
           fontWeight: '900',
           fontSize: 20,
-        }}>Login</ThemedText>
+        }}>Qual a sua filial?</ThemedText>
 
       <ThemedView
         style={{
@@ -48,18 +47,19 @@ export default function Index() {
           alignItems: 'baseline',
           width: '100%'
         }}>
-          <Entypo name="email" size={20} style={{ marginRight: 5 }} color="black" />
-          <ThemedInputText style={{ flexGrow: 1 }} placeholder="Digite seu e-mail" />
+          <Entypo name="home" size={20} style={{ marginRight: 5 }} color="black" />
+          <ThemedSelectDropdown
+            selectedValue={selectedFilial}
+            onValueChange={(itemValue) => setSelectedFilial(itemValue)}
+          />
         </ThemedView>
         <ThemedView style={{
           flexDirection: 'row',
           alignItems: 'baseline',
           width: '100%'
-        }}>          
-          <MaterialCommunityIcons name="onepassword" size={20} style={{ marginRight: 5 }} color="black" />
-          <ThemedInputText style={{ flexGrow: 1 }} placeholder="Digite sua senha" secureTextEntry={true}/>
+        }}>
         </ThemedView>
-        <CustomButton title="Acessar" onPress={handlePress} />
+        <CustomButton title="Entrar" onPress={handlePress} />
       </ThemedView>
     </ThemedView>
   );
