@@ -28,7 +28,7 @@ export function ThemedTable({ data, onRemoveItem }: ThemedTableProps) {
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View style={styles.row}>
-            <Text style={styles.cell}>{item.pedido}</Text>
+            <Text style={styles.cell}>{item.id}</Text>
             <Text style={styles.cell}>{item.data}</Text>
             <Text style={styles.cell}>{item.status}</Text>
             <View style={styles.operationsCell}>

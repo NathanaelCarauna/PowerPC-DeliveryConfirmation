@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { GestureResponderEvent, StyleSheet, View, TextInput, Keyboard } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { GestureResponderEvent, StyleSheet, View, TextInput, Keyboard, Button } from 'react-native';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
+import { Camera, CameraType, CameraView } from 'expo-camera';
 import { CustomButton } from "@/components/CustomButtom";
 import LogoBackground from "@/components/LogoBackground";
 import { ThemedTable } from "@/components/ThemedTable";
@@ -16,37 +17,68 @@ const sampleData = [
 ];
 
 export default function Home() {
-  const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState('');
+  const router = useRouter();  
   const [filteredData, setFilteredData] = useState<any[]>([]);
+  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
+  const [scanning, setScanning] = useState(false);  
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const handleSearch = () => {
-    const result = sampleData.filter(
-      item => item.pedido.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+  useEffect(() => {
+    (async () => {
+      const { status } = await Camera.requestCameraPermissionsAsync();
+      setHasPermission(status === 'granted');
+    })();
+  }, []);
 
-    // Verifica se o item já está na lista acumulada antes de adicionar
+  const handleSearch = (searchQuery : string) => {
+    const result = sampleData.filter(item => item.id === searchQuery);
     const newItems = result.filter(item => !filteredData.some(data => data.id === item.id));
-
-    // Adiciona os novos itens à lista acumulada
     setFilteredData([...filteredData, ...newItems]);
-    setSearchQuery(''); // Limpa o campo de busca
-    Keyboard.dismiss(); // Fecha o teclado
+    setSearchQuery('')
+    Keyboard.dismiss();
   };
 
   const handleRemoveItem = (id: string) => {
     setFilteredData(filteredData.filter(item => item.id !== id));
   };
 
-  function handlePress(event: GestureResponderEvent): void {
+  const handleDelivery = (event: GestureResponderEvent): void => {
     console.log("Login button pressed");
-    router.push('/filialSelection');
-  }
+    router.push('/deliveryEvidencies');
+  };
 
   const handleBarcodeScan = () => {
-    console.log("Barcode scan clicked");
-    // Implement barcode scan functionality here
+    if (hasPermission) {
+      setScanning(true);
+    } else {
+      alert('Camera permission is required to scan barcodes');
+    }
   };
+
+  const handleBarCodeScanned = ({ type, data }: { type: string, data: string }) => {
+    console.log("Bar code detected: " + data)
+    setScanning(false);    
+    handleSearch(data);
+  };
+
+  if (scanning) {
+    return (
+      <View style={styles.cameraContainer}>
+        <CameraView
+          style={styles.camera}
+          barcodeScannerSettings={{
+            barcodeTypes: ["qr", 'code128', 'code39','code93'],
+          }}
+          onBarcodeScanned={handleBarCodeScanned}
+          
+        >
+          <View style={styles.cameraOverlay}>
+            <Button title="Cancelar" onPress={() => setScanning(false)}  />
+          </View>
+        </CameraView>
+      </View>
+    );
+  }
 
   return (
     <ThemedView style={styles.container}>
@@ -61,23 +93,23 @@ export default function Home() {
         />
         <ThemedInputText
           style={styles.input}
-          placeholder="Buscar pedido"
           value={searchQuery}
           onChangeText={setSearchQuery}
-          onSubmitEditing={handleSearch} // Aciona a busca ao pressionar Enter
+          placeholder="Buscar pedido"
+          onSubmitEditing={e => handleSearch(e.nativeEvent.text)}
         />
         <MaterialIcons
           name="search"
           size={20}
           color="black"
-          onPress={handleSearch} // Aciona a busca ao pressionar o ícone de lupa
+          onPress={e => handleSearch(searchQuery)}
           style={styles.searchIcon}
         />
       </ThemedView>
 
       <ThemedView style={styles.content}>
         <ThemedTable data={filteredData} onRemoveItem={handleRemoveItem} />
-        <CustomButton title="Entregar" onPress={handlePress} />
+        <CustomButton title="Entregar" onPress={handleDelivery} />
       </ThemedView>
     </ThemedView>
   );
@@ -89,6 +121,20 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "center",
     padding: 15,
+  },
+  cameraContainer: {
+    flex: 1,
+    width: '100%',
+  },
+  camera: {
+    flex: 1,
+  },
+  cameraOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+    paddingBottom: 20,
   },
   searchContainer: {
     marginTop: '60%',
