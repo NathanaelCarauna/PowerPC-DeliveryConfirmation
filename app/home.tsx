@@ -11,9 +11,9 @@ import { ThemedView } from "@/components/ThemedView";
 import { useRouter } from "expo-router";
 
 const sampleData = [
-  { id: '1', pedido: 'Pedido 001', data: '01/08/2024', status: 'Entregue' },
-  { id: '2', pedido: 'Pedido 002', data: '02/08/2024', status: 'Pendente' },
-  { id: '3', pedido: 'Pedido 003', data: '03/08/2024', status: 'Cancelado' },
+  { id: '1', pedido: 'Pedido 001', data: '01/08/2024' },
+  { id: '2', pedido: 'Pedido 002', data: '02/08/2024' },
+  { id: '3', pedido: 'Pedido 003', data: '03/08/2024' },
 ];
 
 export default function Home() {
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   searchContainer: {
-    marginTop: '60%',
+    marginTop: '40%',
     flexDirection: 'row',
     alignItems: 'center',
     width: '80%',

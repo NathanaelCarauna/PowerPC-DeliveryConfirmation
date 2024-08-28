@@ -28,7 +28,7 @@ export default function FilialSelection() {
       <LogoBackground />
       <ThemedText
         type="subtitle" style={{
-          marginTop: '70%',
+          marginTop: '50%',
           fontWeight: '900',
           fontSize: 20,
         }}>Qual a sua filial?</ThemedText>

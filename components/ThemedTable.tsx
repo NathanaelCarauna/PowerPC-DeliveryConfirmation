@@ -6,7 +6,6 @@ type TableRow = {
   id: string;
   pedido: string;
   data: string;
-  status: string;
 };
 
 type ThemedTableProps = {
@@ -20,7 +19,6 @@ export function ThemedTable({ data, onRemoveItem }: ThemedTableProps) {
       <View style={styles.header}>
         <Text style={styles.headerText}>Pedido</Text>
         <Text style={styles.headerText}>Data</Text>
-        <Text style={styles.headerText}>Status</Text>
         <Text style={styles.headerText}>Operações</Text>
       </View>
       <FlatList
@@ -28,9 +26,8 @@ export function ThemedTable({ data, onRemoveItem }: ThemedTableProps) {
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View style={styles.row}>
-            <Text style={styles.cell}>{item.id}</Text>
+            <Text style={styles.cell}>{item.pedido}</Text>
             <Text style={styles.cell}>{item.data}</Text>
-            <Text style={styles.cell}>{item.status}</Text>
             <View style={styles.operationsCell}>
               <TouchableOpacity onPress={() => console.log('Foto clicada para', item.pedido)}>
                 <MaterialIcons name="photo-camera" size={20} color="black" />

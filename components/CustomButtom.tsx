@@ -4,11 +4,12 @@ import { Text, TouchableOpacity, StyleSheet, GestureResponderEvent } from 'react
 interface CustomButtonProps {
     title: string;
     onPress: (event: GestureResponderEvent) => void;
+    style?: React.CSSProperties | object;    
   }
 
-export function CustomButton({ title, onPress }: CustomButtonProps) {
+export function CustomButton({ title, onPress, style }: CustomButtonProps) {
   return (
-    <TouchableOpacity style={styles.button} onPress={onPress}>
+    <TouchableOpacity style={[styles.button, style,  ]} onPress={onPress}>
       <Text style={styles.buttonText}>{title}</Text>
     </TouchableOpacity>
   );
@@ -16,16 +17,16 @@ export function CustomButton({ title, onPress }: CustomButtonProps) {
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: '#0f3a6d', // Altere a cor do botão aqui
+    backgroundColor: '#0f3a6d',
     padding: 10,
-    borderRadius: 25, // Adiciona border radius
-    alignItems: 'center', // Centraliza o texto no eixo horizontal
-    justifyContent: 'center', // Centraliza o texto no eixo vertical
-    width: '100%', // Define a largura do botão
+    borderRadius: 25, 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    width: '100%', 
     marginTop: 10,
   },
   buttonText: {
-    color: '#FFFFFF', // Cor do texto do botão
+    color: '#FFFFFF', 
     fontSize: 16,
     fontWeight: 'bold',
   },

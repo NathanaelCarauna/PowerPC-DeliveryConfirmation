@@ -5,96 +5,104 @@ import LogoBackground from "@/components/LogoBackground";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { useRouter } from "expo-router";
-import { GestureResponderEvent } from "react-native";
+import { Ionicons } from '@expo/vector-icons';
 
-// Exemplo de dados do pedido (RetornoPedidoDto e ItensDto)
-const samplePedido = {
-  ID_PEDIDO: 12345,
-  NM_CLIENTE: 'João Silva',
-  DT_PEDIDO: '2024-08-01T10:00:00',
-  ID_PROCESSO_VENDA: 9876,
-  DOC_CLIENTE: '123.456.789-00',
-  Itens: [
-    {
-      ID_ITEM_PROCESSO_VENDA_PRODUTO: 1,
-      ID_PROCESSO_VENDA: 9876,
-      ID_PRODUTO: 101,
-      NM_PRODUTO: 'Produto A',
-      QN_PRODUTO: 2,
-    },
-    {
-      ID_ITEM_PROCESSO_VENDA_PRODUTO: 2,
-      ID_PROCESSO_VENDA: 9876,
-      ID_PRODUTO: 102,
-      NM_PRODUTO: 'Produto B',
-      QN_PRODUTO: 1,
-    },
-  ],
-};
+// Exemplos de dados de pedidos
+const samplePedidos = [
+  {
+    ID_PEDIDO: 12345,
+    NM_CLIENTE: 'João Silva',
+    DT_PEDIDO: '2024-08-01T10:00:00',
+    ID_PROCESSO_VENDA: 9876,
+    DOC_CLIENTE: '123.456.789-00',
+    Itens: [
+      { ID_ITEM_PROCESSO_VENDA_PRODUTO: 1, ID_PROCESSO_VENDA: 9876, ID_PRODUTO: 101, NM_PRODUTO: 'Smartphone Galaxy S21', QN_PRODUTO: 1 },
+      { ID_ITEM_PROCESSO_VENDA_PRODUTO: 2, ID_PROCESSO_VENDA: 9876, ID_PRODUTO: 102, NM_PRODUTO: 'Capa protetora', QN_PRODUTO: 2 },
+    ],
+  },
+  {
+    ID_PEDIDO: 12346,
+    NM_CLIENTE: 'Maria Santos',
+    DT_PEDIDO: '2024-08-02T11:30:00',
+    ID_PROCESSO_VENDA: 9877,
+    DOC_CLIENTE: '987.654.321-00',
+    Itens: [
+      { ID_ITEM_PROCESSO_VENDA_PRODUTO: 3, ID_PROCESSO_VENDA: 9877, ID_PRODUTO: 201, NM_PRODUTO: 'Notebook Dell Inspiron', QN_PRODUTO: 1 },
+      { ID_ITEM_PROCESSO_VENDA_PRODUTO: 4, ID_PROCESSO_VENDA: 9877, ID_PRODUTO: 202, NM_PRODUTO: 'Mouse sem fio', QN_PRODUTO: 1 },
+      { ID_ITEM_PROCESSO_VENDA_PRODUTO: 5, ID_PROCESSO_VENDA: 9877, ID_PRODUTO: 203, NM_PRODUTO: 'Mochila para notebook', QN_PRODUTO: 1 },
+    ],
+  },
+  {
+    ID_PEDIDO: 12347,
+    NM_CLIENTE: 'Carlos Ferreira',
+    DT_PEDIDO: '2024-08-03T14:15:00',
+    ID_PROCESSO_VENDA: 9878,
+    DOC_CLIENTE: '456.789.123-00',
+    Itens: [
+      { ID_ITEM_PROCESSO_VENDA_PRODUTO: 6, ID_PROCESSO_VENDA: 9878, ID_PRODUTO: 301, NM_PRODUTO: 'Smart TV 55"', QN_PRODUTO: 1 },
+      { ID_ITEM_PROCESSO_VENDA_PRODUTO: 7, ID_PROCESSO_VENDA: 9878, ID_PRODUTO: 302, NM_PRODUTO: 'Soundbar', QN_PRODUTO: 1 },
+      { ID_ITEM_PROCESSO_VENDA_PRODUTO: 8, ID_PROCESSO_VENDA: 9878, ID_PRODUTO: 303, NM_PRODUTO: 'Suporte de parede', QN_PRODUTO: 1 },
+    ],
+  },
+];
 
 export default function DocumentPreview() {
   const router = useRouter();
 
-  function handlePress(event: GestureResponderEvent): void {
+  function handlePress() {
     console.log("Assinar button pressed");
-    router.push('/filialSelection');
+    router.push('/signatureScreen');
   }
 
   return (
     <ThemedView style={styles.container}>
       <LogoBackground showLabel={false}/>
-      <ThemedText type="subtitle" style={styles.title}>
-        Confirmação de Recebimento de Pedido
-      </ThemedText>
+      <ThemedText style={styles.title}>Confirmação de Recebimento</ThemedText>
 
-      <ScrollView contentContainerStyle={styles.previewContainer}>
-        <ThemedView style={styles.documentContainer}>
-          <ThemedText style={styles.heading}>Detalhes do Pedido</ThemedText>
-
-          <ThemedText style={styles.text}>
-            <ThemedText style={styles.label}>Pedido ID: </ThemedText>
-            {samplePedido.ID_PEDIDO}
-          </ThemedText>
-          <ThemedText style={styles.text}>
-            <ThemedText style={styles.label}>Cliente: </ThemedText>
-            {samplePedido.NM_CLIENTE}
-          </ThemedText>
-          <ThemedText style={styles.text}>
-            <ThemedText style={styles.label}>Data do Pedido: </ThemedText>
-            {new Date(samplePedido.DT_PEDIDO).toLocaleString()}
-          </ThemedText>
-          <ThemedText style={styles.text}>
-            <ThemedText style={styles.label}>Documento do Cliente: </ThemedText>
-            {samplePedido.DOC_CLIENTE}
-          </ThemedText>
-          <ThemedText style={styles.text}>
-            <ThemedText style={styles.label}>Processo de Venda ID: </ThemedText>
-            {samplePedido.ID_PROCESSO_VENDA}
-          </ThemedText>
-
-          <ThemedText style={styles.subheading}>Itens do Pedido:</ThemedText>
-          {samplePedido.Itens.map((item, index) => (
-            <View key={index} style={styles.itemContainer}>
-              <ThemedText style={styles.text}>
-                <ThemedText style={styles.label}>Produto: </ThemedText>
-                {item.NM_PRODUTO}
-              </ThemedText>
-              <ThemedText style={styles.text}>
-                <ThemedText style={styles.label}>Quantidade: </ThemedText>
-                {item.QN_PRODUTO}
-              </ThemedText>
+      <ScrollView style={styles.scrollContainer}>
+        {samplePedidos.map((pedido, pedidoIndex) => (
+          <View key={pedido.ID_PEDIDO} style={styles.documentContainer}>
+            <View style={styles.pedidoHeader}>
+              <ThemedText style={styles.clienteName}>{pedido.NM_CLIENTE}</ThemedText>
+              <ThemedText style={styles.pedidoId}>Pedido #{pedido.ID_PEDIDO}</ThemedText>
             </View>
-          ))}
 
-          <ThemedText style={styles.confirmationText}>
-            Confirmo que recebi todos os itens listados acima em perfeito estado.
-          </ThemedText>
-        </ThemedView>
+            <View style={styles.pedidoInfo}>
+              <View style={styles.infoRow}>
+                <Ionicons name="calendar-outline" size={16} color="#666" />
+                <ThemedText style={styles.infoText}>{new Date(pedido.DT_PEDIDO).toLocaleDateString()}</ThemedText>
+              </View>
+              <View style={styles.infoRow}>
+                <Ionicons name="document-text-outline" size={16} color="#666" />
+                <ThemedText style={styles.infoText}>{pedido.DOC_CLIENTE}</ThemedText>
+              </View>
+              <View style={styles.infoRow}>
+                <Ionicons name="briefcase-outline" size={16} color="#666" />
+                <ThemedText style={styles.infoText}>Processo: {pedido.ID_PROCESSO_VENDA}</ThemedText>
+              </View>
+            </View>
+
+            <ThemedText style={styles.subheading}>Itens do Pedido:</ThemedText>
+            <View style={styles.itensList}>
+              {pedido.Itens.map((item, itemIndex) => (
+                <View key={itemIndex} style={styles.itemRow}>
+                  <ThemedText style={styles.itemQuantity}>{item.QN_PRODUTO}x</ThemedText>
+                  <ThemedText style={styles.itemName}>{item.NM_PRODUTO}</ThemedText>
+                </View>
+              ))}
+            </View>
+
+            <ThemedText style={styles.confirmationText}>
+              Confirmo que recebi todos os itens listados acima em perfeito estado.
+            </ThemedText>
+          </View>
+        ))}
       </ScrollView>
 
-      <ThemedView style={styles.buttonContainer}>
-        <CustomButton title="Assinar" onPress={handlePress} />
-      </ThemedView>
+      <CustomButton 
+        title="Assinar e Finalizar" 
+        onPress={handlePress}        
+      />
     </ThemedView>
   );
 }
@@ -102,70 +110,89 @@ export default function DocumentPreview() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "flex-start",
-    alignItems: "center",
+    backgroundColor: '#f5f5f5',
     padding: 15,
   },
   title: {
-    marginTop: '10%',
-    fontWeight: '900',
-    fontSize: 20,
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginVertical: 20,
+    textAlign: 'center',
   },
-  previewContainer: {
-    flexGrow: 1,
-    width: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
+  scrollContainer: {
+    flex: 1,
   },
   documentContainer: {
-    width: '95%',
-    padding: 20,
-    backgroundColor: 'white',
+    backgroundColor: '#ffffff',
     borderRadius: 10,
+    padding: 20,
+    marginBottom: 20,
+    elevation: 3,
     shadowColor: '#000',
-    shadowOffset: { width: 2, height: 4 }, // Adiciona sombra nas laterais
-    shadowOpacity: 0.3,
-    shadowRadius: 4.65,
-    elevation: 8,
-    borderWidth: 1,
-    borderColor: '#ddd', // Adiciona uma borda leve para destacar o documento
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
-  heading: {
+  pedidoHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  clienteName: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 15,
-    textAlign: 'center',
+  },
+  pedidoId: {
+    fontSize: 14,
+    color: '#666',
+  },
+  pedidoInfo: {
+    marginBottom: 20,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  infoText: {
+    marginLeft: 8,
+    fontSize: 14,
+    color: '#666',
   },
   subheading: {
     fontSize: 16,
     fontWeight: 'bold',
-    marginTop: 20,
     marginBottom: 10,
   },
-  text: {
-    fontSize: 16,
+  itensList: {
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+    paddingTop: 10,
+  },
+  itemRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 8,
   },
-  label: {
+  itemQuantity: {
+    fontSize: 14,
     fontWeight: 'bold',
+    marginRight: 10,
+    minWidth: 30,
   },
-  itemContainer: {
-    marginBottom: 10,
-    padding: 10,
-    backgroundColor: '#f1f1f1',
-    borderRadius: 5,
-    borderColor: '#ddd',
-    borderWidth: 1,
+  itemName: {
+    fontSize: 14,
   },
   confirmationText: {
     marginTop: 30,
-    fontSize: 16,
+    fontSize: 14,
     fontStyle: 'italic',
     textAlign: 'center',
+    color: '#666',
   },
-  buttonContainer: {
-    width: '100%',
-    paddingVertical: 10,
-    alignItems: 'center',
+  signButton: {
+    backgroundColor: '#28a745',
+    paddingVertical: 15,
   },
 });

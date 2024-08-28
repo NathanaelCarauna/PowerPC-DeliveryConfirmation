@@ -26,17 +26,12 @@ export default function Index() {
         padding: 15,
       }}
     >
-      <LogoBackground />
-      <ThemedText
-        type="subtitle" style={{
-          marginTop: '70%',
-          fontWeight: '900',
-          fontSize: 20,
-        }}>Login</ThemedText>
+      <LogoBackground labelText="PowerPC - Login"/>
 
       <ThemedView
         style={{
           flex: 1,
+          marginTop: 50,
           width: '100%',
           justifyContent: 'center',
           alignItems: 'stretch',

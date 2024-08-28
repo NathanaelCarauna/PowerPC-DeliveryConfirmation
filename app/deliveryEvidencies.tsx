@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { TouchableOpacity, Image, Alert, ScrollView, StyleSheet, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { CustomButton } from "@/components/CustomButtom";
@@ -6,7 +6,25 @@ import LogoBackground from "@/components/LogoBackground";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { useRouter } from "expo-router";
-import { GestureResponderEvent } from "react-native";
+import { Ionicons } from '@expo/vector-icons';
+
+// Adicione estas interfaces
+interface ItensDto {
+  ID_ITEM_PROCESSO_VENDA_PRODUTO: number;
+  ID_PROCESSO_VENDA: number;
+  ID_PRODUTO: number;
+  NM_PRODUTO: string;
+  QN_PRODUTO: number;
+}
+
+interface RetornoPedidoDto {
+  ID_PEDIDO: number;
+  NM_CLIENTE: string;
+  DT_PEDIDO: Date;
+  ID_PROCESSO_VENDA: number;
+  DOC_CLIENTE: string;
+  ITENS: ItensDto[];
+}
 
 export default function DeliveryEvidencies() {
   const router = useRouter();
@@ -14,6 +32,81 @@ export default function DeliveryEvidencies() {
   const [docPhoto, setDocPhoto] = useState<string | null>(null);
   const [canhotoPhoto, setCanhotoPhoto] = useState<string | null>(null);
   const [productPhoto, setProductPhoto] = useState<string | null>(null);
+
+  const [pedidos, setPedidos] = useState<RetornoPedidoDto[]>([]);
+
+  useEffect(() => {
+    const carregarPedidos = async () => {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Dados de exemplo com múltiplos pedidos
+      const pedidosExemplo: RetornoPedidoDto[] = [
+        {
+          ID_PEDIDO: 1,
+          NM_CLIENTE: "João Silva",
+          DT_PEDIDO: new Date(2023, 4, 15),
+          ID_PROCESSO_VENDA: 123,
+          DOC_CLIENTE: "123.456.789-00",
+          ITENS: [
+            { ID_ITEM_PROCESSO_VENDA_PRODUTO: 1, ID_PROCESSO_VENDA: 123, ID_PRODUTO: 1, NM_PRODUTO: "Smartphone Galaxy S21", QN_PRODUTO: 1 },
+            { ID_ITEM_PROCESSO_VENDA_PRODUTO: 2, ID_PROCESSO_VENDA: 123, ID_PRODUTO: 2, NM_PRODUTO: "Capa protetora", QN_PRODUTO: 2 },
+          ]
+        },
+        {
+          ID_PEDIDO: 2,
+          NM_CLIENTE: "Maria Santos",
+          DT_PEDIDO: new Date(2023, 4, 16),
+          ID_PROCESSO_VENDA: 124,
+          DOC_CLIENTE: "987.654.321-00",
+          ITENS: [
+            { ID_ITEM_PROCESSO_VENDA_PRODUTO: 3, ID_PROCESSO_VENDA: 124, ID_PRODUTO: 3, NM_PRODUTO: "Notebook Dell Inspiron", QN_PRODUTO: 1 },
+            { ID_ITEM_PROCESSO_VENDA_PRODUTO: 4, ID_PROCESSO_VENDA: 124, ID_PRODUTO: 4, NM_PRODUTO: "Mouse sem fio", QN_PRODUTO: 1 },
+            { ID_ITEM_PROCESSO_VENDA_PRODUTO: 5, ID_PROCESSO_VENDA: 124, ID_PRODUTO: 5, NM_PRODUTO: "Mochila para notebook", QN_PRODUTO: 1 },
+          ]
+        },
+        {
+          ID_PEDIDO: 3,
+          NM_CLIENTE: "Carlos Ferreira",
+          DT_PEDIDO: new Date(2023, 4, 17),
+          ID_PROCESSO_VENDA: 125,
+          DOC_CLIENTE: "456.789.123-00",
+          ITENS: [
+            { ID_ITEM_PROCESSO_VENDA_PRODUTO: 6, ID_PROCESSO_VENDA: 125, ID_PRODUTO: 6, NM_PRODUTO: "Smart TV 55\"", QN_PRODUTO: 1 },
+            { ID_ITEM_PROCESSO_VENDA_PRODUTO: 7, ID_PROCESSO_VENDA: 125, ID_PRODUTO: 7, NM_PRODUTO: "Soundbar", QN_PRODUTO: 1 },
+          ]
+        },
+        {
+          ID_PEDIDO: 4,
+          NM_CLIENTE: "Ana Oliveira",
+          DT_PEDIDO: new Date(2023, 4, 18),
+          ID_PROCESSO_VENDA: 126,
+          DOC_CLIENTE: "789.123.456-00",
+          ITENS: [
+            { ID_ITEM_PROCESSO_VENDA_PRODUTO: 8, ID_PROCESSO_VENDA: 126, ID_PRODUTO: 8, NM_PRODUTO: "Câmera DSLR", QN_PRODUTO: 1 },
+            { ID_ITEM_PROCESSO_VENDA_PRODUTO: 9, ID_PROCESSO_VENDA: 126, ID_PRODUTO: 9, NM_PRODUTO: "Lente 50mm", QN_PRODUTO: 1 },
+            { ID_ITEM_PROCESSO_VENDA_PRODUTO: 10, ID_PROCESSO_VENDA: 126, ID_PRODUTO: 10, NM_PRODUTO: "Tripé", QN_PRODUTO: 1 },
+            { ID_ITEM_PROCESSO_VENDA_PRODUTO: 11, ID_PROCESSO_VENDA: 126, ID_PRODUTO: 11, NM_PRODUTO: "Cartão de memória 64GB", QN_PRODUTO: 2 },
+          ]
+        },
+        {
+          ID_PEDIDO: 5,
+          NM_CLIENTE: "Roberto Almeida",
+          DT_PEDIDO: new Date(2023, 4, 19),
+          ID_PROCESSO_VENDA: 127,
+          DOC_CLIENTE: "321.654.987-00",
+          ITENS: [
+            { ID_ITEM_PROCESSO_VENDA_PRODUTO: 12, ID_PROCESSO_VENDA: 127, ID_PRODUTO: 12, NM_PRODUTO: "Console PlayStation 5", QN_PRODUTO: 1 },
+            { ID_ITEM_PROCESSO_VENDA_PRODUTO: 13, ID_PROCESSO_VENDA: 127, ID_PRODUTO: 13, NM_PRODUTO: "Controle extra", QN_PRODUTO: 1 },
+            { ID_ITEM_PROCESSO_VENDA_PRODUTO: 14, ID_PROCESSO_VENDA: 127, ID_PRODUTO: 14, NM_PRODUTO: "Jogo FIFA 23", QN_PRODUTO: 1 },
+          ]
+        },
+      ];
+      
+      setPedidos(pedidosExemplo);
+    };
+
+    carregarPedidos();
+  }, []);
 
   async function openCamera(setPhoto: React.Dispatch<React.SetStateAction<string | null>>) {
     let result = await ImagePicker.launchCameraAsync({
@@ -41,45 +134,62 @@ export default function DeliveryEvidencies() {
 
   return (
     <ThemedView style={styles.container}>
-      <LogoBackground />
+      <LogoBackground showLabel={false} />
       <ThemedText style={styles.title}>Comprovação de entrega</ThemedText>
 
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <TouchableOpacity onPress={() => openCamera(setDocPhoto)} style={styles.photoButton}>
-          {docPhoto ? (
-            <View style={styles.imageContainer}>
-              <Image source={{ uri: docPhoto }} style={styles.imagePreview} />
-              <ThemedText style={styles.imageLabel}>Foto do Documento</ThemedText>
+      <ScrollView style={styles.scrollContainer}>
+        <View style={styles.pedidosContainer}>
+          {pedidos.map((pedido, index) => (
+            <View key={pedido.ID_PEDIDO} style={styles.pedidoCard}>
+              <View style={styles.pedidoHeader}>
+                <ThemedText style={styles.clienteName}>{pedido.NM_CLIENTE}</ThemedText>
+                <ThemedText style={styles.pedidoId}>Pedido #{pedido.ID_PEDIDO}</ThemedText>
+              </View>
+              <View style={styles.pedidoInfo}>
+                <View style={styles.infoRow}>
+                  <Ionicons name="calendar-outline" size={16} color="#666" />
+                  <ThemedText style={styles.infoText}>{pedido.DT_PEDIDO.toLocaleDateString()}</ThemedText>
+                </View>
+                <View style={styles.infoRow}>
+                  <Ionicons name="document-text-outline" size={16} color="#666" />
+                  <ThemedText style={styles.infoText}>{pedido.DOC_CLIENTE}</ThemedText>
+                </View>
+              </View>
+              <View style={styles.itensList}>
+                {pedido.ITENS.map((item, itemIndex) => (
+                  <View key={itemIndex} style={styles.itemRow}>
+                    <ThemedText style={styles.itemQuantity}>{item.QN_PRODUTO}x</ThemedText>
+                    <ThemedText style={styles.itemName}>{item.NM_PRODUTO}</ThemedText>
+                  </View>
+                ))}
+              </View>
             </View>
-          ) : (
-            <ThemedText style={styles.buttonText}>Foto do Documento</ThemedText>
-          )}
+          ))}
+        </View>
+      </ScrollView>
+
+      <View style={styles.photoButtonsContainer}>
+        <TouchableOpacity onPress={() => openCamera(setDocPhoto)} style={styles.photoButton}>
+          <Ionicons name={docPhoto ? "checkmark-circle" : "document-text-outline"} size={24} color="#fff" />
+          <ThemedText style={styles.buttonText}>Documento</ThemedText>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => openCamera(setCanhotoPhoto)} style={styles.photoButton}>
-          {canhotoPhoto ? (
-            <View style={styles.imageContainer}>
-              <Image source={{ uri: canhotoPhoto }} style={styles.imagePreview} />
-              <ThemedText style={styles.imageLabel}>Foto do Canhoto</ThemedText>
-            </View>
-          ) : (
-            <ThemedText style={styles.buttonText}>Foto do Canhoto</ThemedText>
-          )}
+          <Ionicons name={canhotoPhoto ? "checkmark-circle" : "receipt-outline"} size={24} color="#fff" />
+          <ThemedText style={styles.buttonText}>Canhoto</ThemedText>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => openCamera(setProductPhoto)} style={styles.photoButton}>
-          {productPhoto ? (
-            <View style={styles.imageContainer}>
-              <Image source={{ uri: productPhoto }} style={styles.imagePreview} />
-              <ThemedText style={styles.imageLabel}>Foto do Produto</ThemedText>
-            </View>
-          ) : (
-            <ThemedText style={styles.buttonText}>Foto do Produto</ThemedText>
-          )}
+          <Ionicons name={productPhoto ? "checkmark-circle" : "cube-outline"} size={24} color="#fff" />
+          <ThemedText style={styles.buttonText}>Produto</ThemedText>
         </TouchableOpacity>
-      </ScrollView>
+      </View>
 
-      <CustomButton title="Assinar" onPress={handleSignPress} />
+      <CustomButton 
+        title="Assinar e Finalizar" 
+        onPress={handleSignPress}
+        style={styles.signButton}
+      />
     </ThemedView>
   );
 }
@@ -87,57 +197,98 @@ export default function DeliveryEvidencies() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "flex-start",
-    alignItems: "center",
+    backgroundColor: '#f5f5f5',
     padding: 15,
   },
   title: {
-    marginTop: '65%',
-    marginBottom: 20,
-    fontWeight: '900',
-    fontSize: 20,
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginVertical: 20,
+    textAlign: 'center',
   },
   scrollContainer: {
-    flexGrow: 1,
-    width: 200,
-    justifyContent: 'center',
-    alignItems: 'stretch',
+    flex: 1,
+  },
+  pedidosContainer: {
     paddingBottom: 20,
+  },
+  pedidoCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 10,
+    padding: 15,
+    marginBottom: 15,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  pedidoHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  clienteName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  pedidoId: {
+    fontSize: 14,
+    color: '#666',
+  },
+  pedidoInfo: {
+    marginBottom: 10,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 5,
+  },
+  infoText: {
+    marginLeft: 8,
+    fontSize: 14,
+    color: '#666',
+  },
+  itensList: {
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+    paddingTop: 10,
+  },
+  itemRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 5,
+  },
+  itemQuantity: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginRight: 10,
+    minWidth: 30,
+  },
+  itemName: {
+    fontSize: 14,
+  },
+  photoButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
   },
   photoButton: {
     backgroundColor: '#0f3a6d',
     padding: 15,
-    marginBottom: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
     borderRadius: 10,
-    elevation: 3,
+    alignItems: 'center',
+    flex: 1,
+    marginHorizontal: 5,
   },
   buttonText: {
     color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  imageContainer: {
-    position: 'relative',
-    width: 100,
-    height: 100,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  imagePreview: {
-    width: 100,
-    height: 100,
-    borderRadius: 10,
-  },
-  imageLabel: {
-    position: 'absolute',
-    bottom: 5,
-    backgroundColor: 'rgba(0, 123, 255, 0.8)',
-    color: '#fff',
     fontSize: 12,
-    fontWeight: 'bold',
-    paddingHorizontal: 5,
-    borderRadius: 5,
-  },  
+    marginTop: 5,
+  },
+  signButton: {
+    backgroundColor: '#28a745',
+    paddingVertical: 15,
+  },
 });
