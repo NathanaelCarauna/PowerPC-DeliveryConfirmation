@@ -35,6 +35,7 @@ export default function RootLayout() {
         <Stack.Screen name="deliveryEvidencies" options={{ headerShown: false }} />
         <Stack.Screen name="documentPreview" options={{ headerShown: false }} />
         <Stack.Screen name="signatureScreen" options={{ headerShown: false }} />
+        <Stack.Screen name="deliveryCompleted" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
       </Stack>
     </ThemeProvider>

@@ -10,6 +10,7 @@ export default function SignatureScreen() {
   const router = useRouter();
   const signatureRef = useRef<SignatureViewRef>(null);
   const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const setLandscapeOrientation = async () => {
@@ -31,12 +32,23 @@ export default function SignatureScreen() {
     };
   }, []);
 
-  const handleSignature = (signature: string) => {
+  const handleSignature = async (signature: string) => {
     if (signature) {
-      console.log("Assinatura capturada:", signature);
-      Alert.alert('Assinatura capturada', 'A assinatura foi capturada com sucesso!');
-      // Aqui você pode enviar a assinatura para o servidor ou salvar localmente
+      setIsLoading(true);
+      try {
+        // Simular uma requisição
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // Navegar para a página DeliveryCompleted
+        router.push('/deliveryCompleted');
+      } catch (error) {
+        console.error("Erro ao processar a assinatura:", error);
+        // Aqui você pode adicionar um tratamento de erro, se necessário
+      } finally {
+        setIsLoading(false);
+      }
     } else {
+      // Manter o alerta para assinatura vazia
       Alert.alert('Erro', 'Por favor, forneça uma assinatura.');
     }
   };
@@ -91,7 +103,12 @@ export default function SignatureScreen() {
       </View>
       <View style={styles.buttonsContainer}>
         <CustomButton title="Limpar" onPress={handleClear} style={styles.button} />
-        <CustomButton title="Confirmar" onPress={handleConfirm} style={styles.button} />
+        <CustomButton 
+          title={isLoading ? "Enviando..." : "Confirmar"} 
+          onPress={handleConfirm} 
+          style={styles.button}
+          // disabled={isLoading}
+        />
       </View>
     </ThemedView>
   );
