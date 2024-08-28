@@ -9,7 +9,7 @@ interface CustomButtonProps {
 
 export function CustomButton({ title, onPress, style }: CustomButtonProps) {
   return (
-    <TouchableOpacity style={[styles.button, style,  ]} onPress={onPress}>
+    <TouchableOpacity style={[style, styles.button, ,  ]} onPress={onPress}>
       <Text style={styles.buttonText}>{title}</Text>
     </TouchableOpacity>
   );
