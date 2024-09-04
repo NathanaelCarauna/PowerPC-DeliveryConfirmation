@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { GestureResponderEvent, StyleSheet, View, TextInput, Keyboard, Button } from 'react-native';
+import { GestureResponderEvent, StyleSheet, View, Keyboard, Button, Alert } from 'react-native';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { Camera, CameraType, CameraView } from 'expo-camera';
 import { CustomButton } from "@/components/CustomButtom";
@@ -9,16 +9,11 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedInputText } from "@/components/ThemedTextInput";
 import { ThemedView } from "@/components/ThemedView";
 import { useRouter } from "expo-router";
-
-const sampleData = [
-  { id: '1', pedido: 'Pedido 001', data: '01/08/2024' },
-  { id: '2', pedido: 'Pedido 002', data: '02/08/2024' },
-  { id: '3', pedido: 'Pedido 003', data: '03/08/2024' },
-];
+import { useAppContext } from './context/appContext';
 
 export default function Home() {
   const router = useRouter();  
-  const [filteredData, setFilteredData] = useState<any[]>([]);
+  const { state, fetchPedido, removePedido } = useAppContext();
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [scanning, setScanning] = useState(false);  
   const [searchQuery, setSearchQuery] = useState('');
@@ -30,35 +25,66 @@ export default function Home() {
     })();
   }, []);
 
-  const handleSearch = (searchQuery : string) => {
-    const result = sampleData.filter(item => item.id === searchQuery);
-    const newItems = result.filter(item => !filteredData.some(data => data.id === item.id));
-    setFilteredData([...filteredData, ...newItems]);
-    setSearchQuery('')
-    Keyboard.dismiss();
-  };
+  const handleSearch = async (searchQuery: string) => {
+    console.log("Home - Iniciando busca de pedido:", searchQuery);
+    const pedidoId = parseInt(searchQuery, 10);
+    if (isNaN(pedidoId)) {
+      console.log("Home - ID de pedido inválido");
+      Alert.alert("Erro", "Por favor, insira um ID de pedido válido.");
+      return;
+    }
 
-  const handleRemoveItem = (id: string) => {
-    setFilteredData(filteredData.filter(item => item.id !== id));
+    try {
+      await fetchPedido(pedidoId);
+      console.log("Home - Pedido buscado com sucesso");
+      setSearchQuery('');
+      Keyboard.dismiss();
+    } catch (error) {
+      console.error("Home - Erro ao buscar pedido:", error);
+      Alert.alert("Erro", "Não foi possível buscar o pedido. Tente novamente.");
+    }
   };
 
   const handleDelivery = (event: GestureResponderEvent): void => {
-    console.log("Login button pressed");
+    console.log("Home - Botão de entrega pressionado");
     router.push('/deliveryEvidencies');
   };
 
   const handleBarcodeScan = () => {
     if (hasPermission) {
+      console.log("Home - Iniciando escaneamento de código de barras");
       setScanning(true);
     } else {
-      alert('Camera permission is required to scan barcodes');
+      console.log("Home - Permissão de câmera não concedida");
+      Alert.alert("Erro", "É necessária permissão para a câmera para escanear códigos de barras");
     }
   };
 
   const handleBarCodeScanned = ({ type, data }: { type: string, data: string }) => {
-    console.log("Bar code detected: " + data)
+    console.log("Home - Código de barras detectado:", data);
     setScanning(false);    
     handleSearch(data);
+  };
+
+  const handleRemoveItem = (id: number) => {
+    console.log("Home - Removendo item:", id);
+    Alert.alert(
+      "Remover Pedido",
+      "Tem certeza que deseja remover este pedido?",
+      [
+        {
+          text: "Cancelar",
+          style: "cancel"
+        },
+        { 
+          text: "OK", 
+          onPress: () => {
+            removePedido(id);
+            console.log("Home - Pedido removido:", id);
+          }
+        }
+      ]
+    );
   };
 
   if (scanning) {
@@ -70,10 +96,9 @@ export default function Home() {
             barcodeTypes: ["qr", 'code128', 'code39','code93'],
           }}
           onBarcodeScanned={handleBarCodeScanned}
-          
         >
           <View style={styles.cameraOverlay}>
-            <Button title="Cancelar" onPress={() => setScanning(false)}  />
+            <Button title="Cancelar" onPress={() => setScanning(false)} />
           </View>
         </CameraView>
       </View>
@@ -102,13 +127,13 @@ export default function Home() {
           name="search"
           size={20}
           color="black"
-          onPress={e => handleSearch(searchQuery)}
+          onPress={() => handleSearch(searchQuery)}
           style={styles.searchIcon}
         />
       </ThemedView>
 
       <ThemedView style={styles.content}>
-        <ThemedTable data={filteredData} onRemoveItem={handleRemoveItem} />
+        <ThemedTable data={state.pedidos} onRemoveItem={handleRemoveItem} />
         <CustomButton title="Entregar" onPress={handleDelivery} />
       </ThemedView>
     </ThemedView>

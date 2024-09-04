@@ -1,38 +1,55 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { FlatList, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 
-type TableRow = {
-  id: string;
-  pedido: string;
-  data: string;
+type Pedido = {
+  ID_PEDIDO: number;
+  NM_CLIENTE: string;
+  DT_PEDIDO: string;
+  ID_PROCESSO_VENDA: number;
+  DOC_CLIENTE: string;
+  Itens: Array<{
+    ID_ITEM_PROCESSO_VENDA_PRODUTO: number;
+    ID_PROCESSO_VENDA: number;
+    ID_PRODUTO: number;
+    NM_PRODUTO: string;
+    QN_PRODUTO: number;
+  }>;
 };
 
 type ThemedTableProps = {
-  data: TableRow[];
-  onRemoveItem: (id: string) => void;
+  data: Pedido[];
+  onRemoveItem: (id: number) => void;
 };
 
 export function ThemedTable({ data, onRemoveItem }: ThemedTableProps) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerText}>Pedido</Text>
-        <Text style={styles.headerText}>Data</Text>
-        <Text style={styles.headerText}>Operações</Text>
+        <Text style={[styles.headerText, styles.idColumn]}>Pedido</Text>
+        <Text style={[styles.headerText, styles.clientColumn]}>Cliente</Text>
+        <Text style={[styles.headerText, styles.dateColumn]}>Data</Text>
+        <Text style={[styles.headerText, styles.operationsColumn]}>Operações</Text>
       </View>
       <FlatList
         data={data}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.ID_PEDIDO.toString()}
         renderItem={({ item }) => (
           <View style={styles.row}>
-            <Text style={styles.cell}>{item.pedido}</Text>
-            <Text style={styles.cell}>{item.data}</Text>
-            <View style={styles.operationsCell}>
-              <TouchableOpacity onPress={() => console.log('Foto clicada para', item.pedido)}>
+            <View style={styles.idColumn}>
+              <Text style={styles.cell}>{item.ID_PEDIDO}</Text>
+            </View>
+            <View style={styles.clientColumn}>
+              <Text style={styles.cell} numberOfLines={2} ellipsizeMode="tail">{item.NM_CLIENTE}</Text>
+            </View>
+            <View style={styles.dateColumn}>
+              <Text style={styles.cell}>{new Date(item.DT_PEDIDO).toLocaleDateString()}</Text>
+            </View>
+            <View style={styles.operationsColumn}>
+              <TouchableOpacity onPress={() => console.log('Foto clicada para', item.ID_PEDIDO)}>
                 <MaterialIcons name="photo-camera" size={20} color="black" />
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => onRemoveItem(item.id)}>
+              <TouchableOpacity onPress={() => onRemoveItem(item.ID_PEDIDO)}>
                 <MaterialIcons name="delete" size={20} color="red" />
               </TouchableOpacity>
             </View>
@@ -65,7 +82,6 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ddd',
   },
   headerText: {
-    flex: 1,
     fontWeight: 'bold',
     color: '#333',
     textAlign: 'center',
@@ -75,16 +91,27 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
     padding: 10,
+    alignItems: 'center',
   },
   cell: {
-    flex: 1,
-    textAlign: 'center',
     color: '#333',
   },
-  operationsCell: {
+  idColumn: {
+    width: '20%',
+    alignItems: 'center',
+  },
+  clientColumn: {
+    width: '30%',
+    alignItems: 'center',
+  },
+  dateColumn: {
+    width: '25%',
+    alignItems: 'center',
+  },
+  operationsColumn: {
+    width: '25%',
     flexDirection: 'row',
     justifyContent: 'space-evenly',
     alignItems: 'center',
-    flex: 1,
   },
 });

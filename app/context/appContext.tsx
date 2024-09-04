@@ -39,6 +39,8 @@ type AppState = {
 type Action =
   | { type: 'SET_USER'; payload: User | null }
   | { type: 'SET_PEDIDOS'; payload: Pedido[] }
+  | { type: 'ADD_PEDIDO'; payload: Pedido }
+  | { type: 'REMOVE_PEDIDO'; payload: number } // Novo tipo de ação
   | { type: 'ADD_ASSINATURA'; payload: { pedidoId: number; assinatura: string } }
   | { type: 'SET_SELECTED_FILIAL'; payload: RetornoFilialDto | null };
 
@@ -47,6 +49,8 @@ const AppContext = createContext<{
   state: AppState;
   dispatch: React.Dispatch<Action>;
   login: (username: string, password: string) => Promise<void>;
+  fetchPedido: (idPedido: number) => Promise<void>;
+  removePedido: (idPedido: number) => void;
 } | undefined>(undefined);
 
 // Crie o reducer
@@ -59,6 +63,18 @@ function appReducer(state: AppState, action: Action): AppState {
     case 'SET_PEDIDOS':
       console.log("AppContext - Reducer - Atualizando pedidos. Quantidade:", action.payload.length);
       return { ...state, pedidos: action.payload };
+    case 'ADD_PEDIDO':
+      console.log("AppContext - Reducer - Adicionando novo pedido:", action.payload.ID_PEDIDO);
+      return {
+        ...state,
+        pedidos: [...state.pedidos, action.payload]
+      };
+    case 'REMOVE_PEDIDO':
+      console.log("AppContext - Reducer - Removendo pedido:", action.payload);
+      return {
+        ...state,
+        pedidos: state.pedidos.filter(pedido => pedido.ID_PEDIDO !== action.payload)
+      };
     case 'ADD_ASSINATURA':
       console.log("AppContext - Reducer - Adicionando assinatura para o pedido:", action.payload.pedidoId);
       return {
@@ -117,10 +133,38 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Função para buscar um pedido pelo ID_PEDIDO
+  const fetchPedido = async (idPedido: number) => {
+    console.log("AppContext - Iniciando busca do pedido:", idPedido);
+    try {
+      // Aqui você faria a chamada à API para buscar o pedido
+      // Este é um exemplo simulado
+      const pedido = await simulateFetchPedido(idPedido);
+      
+      console.log("AppContext - Pedido encontrado:", pedido);
+      dispatch({
+        type: 'ADD_PEDIDO',
+        payload: pedido,
+      });
+    } catch (error) {
+      console.error('AppContext - Erro ao buscar pedido:', error);
+      // Aqui você pode disparar uma ação para mostrar uma mensagem de erro
+    }
+  };
+
+  // Função para remover um pedido
+  const removePedido = (idPedido: number) => {
+    console.log("AppContext - Iniciando remoção do pedido:", idPedido);
+    dispatch({
+      type: 'REMOVE_PEDIDO',
+      payload: idPedido,
+    });
+  };
+
   console.log("AppContext - Estado atual:", state);
 
   return (
-    <AppContext.Provider value={{ state, dispatch, login }}>
+    <AppContext.Provider value={{ state, dispatch, login, fetchPedido, removePedido }}>
       {children}
     </AppContext.Provider>
   );
@@ -156,4 +200,31 @@ async function simulateApiCall(username: string, password: string) {
   };
   console.log("AppContext - Resposta simulada da API:", response);
   return response;
+}
+
+// Função auxiliar para simular uma chamada de API para buscar um pedido
+async function simulateFetchPedido(idPedido: number): Promise<Pedido> {
+  console.log("AppContext - Simulando chamada de API para buscar pedido:", idPedido);
+  // Simula uma chamada de API com um atraso de 1 segundo
+  await new Promise(resolve => setTimeout(resolve, 1000));
+
+  // Simula uma resposta bem-sucedida
+  const pedido: Pedido = {
+    ID_PEDIDO: idPedido,
+    NM_CLIENTE: `Cliente ${idPedido}`,
+    DT_PEDIDO: new Date().toISOString(),
+    ID_PROCESSO_VENDA: idPedido * 100,
+    DOC_CLIENTE: `DOC${idPedido}`,
+    Itens: [
+      {
+        ID_ITEM_PROCESSO_VENDA_PRODUTO: idPedido * 1000,
+        ID_PROCESSO_VENDA: idPedido * 100,
+        ID_PRODUTO: idPedido * 10,
+        NM_PRODUTO: `Produto ${idPedido}`,
+        QN_PRODUTO: Math.floor(Math.random() * 10) + 1,
+      }
+    ],
+  };
+  console.log("AppContext - Resposta simulada da API para busca de pedido:", pedido);
+  return pedido;
 }
