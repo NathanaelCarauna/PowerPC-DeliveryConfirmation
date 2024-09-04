@@ -1,20 +1,43 @@
+import React, { useState } from 'react';
 import { CustomButton } from "@/components/CustomButtom";
 import LogoBackground from "@/components/LogoBackground";
-
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedInputText } from "@/components/ThemedTextInput";
 import { ThemedView } from "@/components/ThemedView";
 import { Entypo } from '@expo/vector-icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useNavigation, useRouter } from "expo-router";
-import { Button, GestureResponderEvent, Text, View } from "react-native";
-import { NativeStackScreenProps } from "react-native-screens/lib/typescript/native-stack/types";
+import { useRouter } from "expo-router";
+import { ActivityIndicator, Alert } from "react-native";
+import { useAppContext } from './context/appContext';
 
 export default function Index() {
-  const router = useRouter()
-  function handlePress(event: GestureResponderEvent): void {
-    console.log("Login button pressed");
-    router.push('/filialSelection')
+  const router = useRouter();
+  const { login, state } = useAppContext();
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  async function handlePress() {
+    if (!username || !password) {
+      Alert.alert("", "Por favor, preencha todos os campos.");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await login(username, password);
+      if (state.user && state.user.authenticated) {
+        console.log("Login bem-sucedido");
+        router.push('/filialSelection');
+      } else {
+        Alert.alert("", "Falha na autenticação. Verifique suas credenciais.");
+      }
+    } catch (error) {
+      console.error("Erro no login:", error);
+      Alert.alert("", "Ocorreu um erro durante o login. Tente novamente.");
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -36,7 +59,6 @@ export default function Index() {
           justifyContent: 'center',
           alignItems: 'stretch',
           backgroundColor: 'transparent'
-
         }}>
         <ThemedView style={{
           flexDirection: 'row',
@@ -44,7 +66,12 @@ export default function Index() {
           width: '100%'
         }}>
           <Entypo name="email" size={20} style={{ marginRight: 5 }} color="black" />
-          <ThemedInputText style={{ flexGrow: 1 }} placeholder="Digite seu e-mail" />
+          <ThemedInputText 
+            style={{ flexGrow: 1 }} 
+            placeholder="Digite seu e-mail" 
+            value={username}
+            onChangeText={setUsername}
+          />
         </ThemedView>
         <ThemedView style={{
           flexDirection: 'row',
@@ -52,9 +79,19 @@ export default function Index() {
           width: '100%'
         }}>          
           <MaterialCommunityIcons name="onepassword" size={20} style={{ marginRight: 5 }} color="black" />
-          <ThemedInputText style={{ flexGrow: 1 }} placeholder="Digite sua senha" secureTextEntry={true}/>
+          <ThemedInputText 
+            style={{ flexGrow: 1 }} 
+            placeholder="Digite sua senha" 
+            secureTextEntry={true}
+            value={password}
+            onChangeText={setPassword}
+          />
         </ThemedView>
-        <CustomButton title="Acessar" onPress={handlePress} />
+        {isLoading ? (
+          <ActivityIndicator size="large" color="#0000ff" />
+        ) : (
+          <CustomButton title="Acessar" onPress={handlePress} />
+        )}
       </ThemedView>
     </ThemedView>
   );

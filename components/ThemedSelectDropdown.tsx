@@ -3,11 +3,17 @@ import { Modal, Pressable, StyleSheet, Text, TouchableOpacity, View, FlatList } 
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { Entypo } from '@expo/vector-icons';
 
+export type SelectItem = {
+  label: string;
+  value: string;
+};
+
 export type ThemedSelectDropdownProps = {
   lightColor?: string;
   darkColor?: string;
   selectedValue: string;
   onValueChange: (itemValue: string) => void;
+  items: SelectItem[];
 };
 
 export function ThemedSelectDropdown({
@@ -15,34 +21,11 @@ export function ThemedSelectDropdown({
   darkColor,
   selectedValue,
   onValueChange,
+  items,
 }: ThemedSelectDropdownProps) {
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
   
   const [modalVisible, setModalVisible] = useState(false);
-
-  // Mock data for branches (filiais)
-  const filialOptions = [
-    { label: 'Filial 1', value: '1' },
-    { label: 'Filial 2', value: '2' },
-    { label: 'Filial 3', value: '3' },
-    { label: 'Filial 4', value: '4' },
-    { label: 'Filial 5', value: '5' },
-    { label: 'Filial 6', value: '6' },
-    { label: 'Filial 7', value: '7' },
-    { label: 'Filial 8', value: '8' },
-    { label: 'Filial 9', value: '9' },
-    { label: 'Filial 10', value: '10' },
-    { label: 'Filial 11', value: '11' },
-    { label: 'Filial 12', value: '12' },
-    { label: 'Filial 13', value: '13' },
-    { label: 'Filial 14', value: '14' },
-    { label: 'Filial 15', value: '15' },
-    { label: 'Filial 16', value: '16' },
-    { label: 'Filial 17', value: '17' },
-    { label: 'Filial 18', value: '18' },
-    { label: 'Filial 19', value: '19' },
-    { label: 'Filial 20', value: '20' },
-  ];
 
   const handleSelect = (value: string) => {
     onValueChange(value);
@@ -56,7 +39,7 @@ export function ThemedSelectDropdown({
         onPress={() => setModalVisible(true)}
       >
         <Text style={[styles.selectText, { color }]}>
-          {filialOptions.find(option => option.value === selectedValue)?.label || 'Select an option'}
+          {items.find(item => item.value === selectedValue)?.label || 'Selecione uma opção'}
         </Text>
         <Entypo name="chevron-down" size={20} color={color} />
       </Pressable>
@@ -71,7 +54,7 @@ export function ThemedSelectDropdown({
           <View style={styles.modalOverlay}>
             <View style={styles.modalContainer}>
               <FlatList 
-                data={filialOptions}
+                data={items}
                 keyExtractor={(item) => item.value}
                 renderItem={({ item }) => (
                   <TouchableOpacity 
