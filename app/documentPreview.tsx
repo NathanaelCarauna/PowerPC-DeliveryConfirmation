@@ -7,7 +7,7 @@ import { ThemedView } from "@/components/ThemedView";
 import { useRouter } from "expo-router";
 import { Ionicons } from '@expo/vector-icons';
 
-// Exemplos de dados de pedidos
+// Exemplos de dados de pedidos atualizados
 const samplePedidos = [
   {
     ID_PEDIDO: 12345,
@@ -16,8 +16,8 @@ const samplePedidos = [
     ID_PROCESSO_VENDA: 9876,
     DOC_CLIENTE: '123.456.789-00',
     Itens: [
-      { ID_ITEM_PROCESSO_VENDA_PRODUTO: 1, ID_PROCESSO_VENDA: 9876, ID_PRODUTO: 101, NM_PRODUTO: 'Smartphone Galaxy S21', QN_PRODUTO: 1 },
-      { ID_ITEM_PROCESSO_VENDA_PRODUTO: 2, ID_PROCESSO_VENDA: 9876, ID_PRODUTO: 102, NM_PRODUTO: 'Capa protetora', QN_PRODUTO: 2 },
+      { ID_ITEM_PROCESSO_VENDA_PRODUTO: 1, ID_PROCESSO_VENDA: 9876, ID_PRODUTO: 10001, NM_PRODUTO: 'Smartphone Galaxy S21', QN_PRODUTO: 1 },
+      { ID_ITEM_PROCESSO_VENDA_PRODUTO: 2, ID_PROCESSO_VENDA: 9876, ID_PRODUTO: 10002, NM_PRODUTO: 'Capa protetora', QN_PRODUTO: 2 },
     ],
   },
   {
@@ -27,9 +27,9 @@ const samplePedidos = [
     ID_PROCESSO_VENDA: 9877,
     DOC_CLIENTE: '987.654.321-00',
     Itens: [
-      { ID_ITEM_PROCESSO_VENDA_PRODUTO: 3, ID_PROCESSO_VENDA: 9877, ID_PRODUTO: 201, NM_PRODUTO: 'Notebook Dell Inspiron', QN_PRODUTO: 1 },
-      { ID_ITEM_PROCESSO_VENDA_PRODUTO: 4, ID_PROCESSO_VENDA: 9877, ID_PRODUTO: 202, NM_PRODUTO: 'Mouse sem fio', QN_PRODUTO: 1 },
-      { ID_ITEM_PROCESSO_VENDA_PRODUTO: 5, ID_PROCESSO_VENDA: 9877, ID_PRODUTO: 203, NM_PRODUTO: 'Mochila para notebook', QN_PRODUTO: 1 },
+      { ID_ITEM_PROCESSO_VENDA_PRODUTO: 3, ID_PROCESSO_VENDA: 9877, ID_PRODUTO: 20001, NM_PRODUTO: 'Notebook Dell Inspiron', QN_PRODUTO: 1 },
+      { ID_ITEM_PROCESSO_VENDA_PRODUTO: 4, ID_PROCESSO_VENDA: 9877, ID_PRODUTO: 20002, NM_PRODUTO: 'Mouse sem fio', QN_PRODUTO: 1 },
+      { ID_ITEM_PROCESSO_VENDA_PRODUTO: 5, ID_PROCESSO_VENDA: 9877, ID_PRODUTO: 20003, NM_PRODUTO: 'Mochila para notebook', QN_PRODUTO: 1 },
     ],
   },
   {
@@ -39,9 +39,8 @@ const samplePedidos = [
     ID_PROCESSO_VENDA: 9878,
     DOC_CLIENTE: '456.789.123-00',
     Itens: [
-      { ID_ITEM_PROCESSO_VENDA_PRODUTO: 6, ID_PROCESSO_VENDA: 9878, ID_PRODUTO: 301, NM_PRODUTO: 'Smart TV 55"', QN_PRODUTO: 1 },
-      { ID_ITEM_PROCESSO_VENDA_PRODUTO: 7, ID_PROCESSO_VENDA: 9878, ID_PRODUTO: 302, NM_PRODUTO: 'Soundbar', QN_PRODUTO: 1 },
-      { ID_ITEM_PROCESSO_VENDA_PRODUTO: 8, ID_PROCESSO_VENDA: 9878, ID_PRODUTO: 303, NM_PRODUTO: 'Suporte de parede', QN_PRODUTO: 1 },
+      { ID_ITEM_PROCESSO_VENDA_PRODUTO: 6, ID_PROCESSO_VENDA: 9878, ID_PRODUTO: 30001, NM_PRODUTO: 'Smart TV 55"', QN_PRODUTO: 1 },
+      { ID_ITEM_PROCESSO_VENDA_PRODUTO: 7, ID_PROCESSO_VENDA: 9878, ID_PRODUTO: 30002, NM_PRODUTO: 'Soundbar', QN_PRODUTO: 1 },
     ],
   },
 ];
@@ -86,8 +85,11 @@ export default function DocumentPreview() {
             <View style={styles.itensList}>
               {pedido.Itens.map((item, itemIndex) => (
                 <View key={itemIndex} style={styles.itemRow}>
+                  <View style={styles.itemNameContainer}>
+                    <ThemedText style={styles.itemCode}>{item.ID_PRODUTO} - </ThemedText>
+                    <ThemedText style={styles.itemName}>{item.NM_PRODUTO}</ThemedText>
+                  </View>
                   <ThemedText style={styles.itemQuantity}>{item.QN_PRODUTO}x</ThemedText>
-                  <ThemedText style={styles.itemName}>{item.NM_PRODUTO}</ThemedText>
                 </View>
               ))}
             </View>
@@ -173,16 +175,29 @@ const styles = StyleSheet.create({
   itemRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
+    justifyContent: 'space-between',
+    marginBottom: 5,
+  },
+  itemNameContainer: {
+    flexDirection: 'row',
+    flex: 1,
+    alignItems: 'center',
+  },
+  itemCode: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#666',
+    marginRight: 5,
+  },
+  itemName: {
+    fontSize: 14,
+    flex: 1,
   },
   itemQuantity: {
     fontSize: 14,
     fontWeight: 'bold',
-    marginRight: 10,
     minWidth: 30,
-  },
-  itemName: {
-    fontSize: 14,
+    textAlign: 'right',
   },
   confirmationText: {
     marginTop: 30,
@@ -190,9 +205,5 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     textAlign: 'center',
     color: '#666',
-  },
-  signButton: {
-    backgroundColor: '#28a745',
-    paddingVertical: 15,
   },
 });

@@ -39,7 +39,7 @@ export default function DeliveryEvidencies() {
     const carregarPedidos = async () => {
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Dados de exemplo com múltiplos pedidos
+      // Dados de exemplo com múltiplos pedidos e IDs de produtos de 5 dígitos
       const pedidosExemplo: RetornoPedidoDto[] = [
         {
           ID_PEDIDO: 1,
@@ -48,8 +48,8 @@ export default function DeliveryEvidencies() {
           ID_PROCESSO_VENDA: 123,
           DOC_CLIENTE: "123.456.789-00",
           ITENS: [
-            { ID_ITEM_PROCESSO_VENDA_PRODUTO: 1, ID_PROCESSO_VENDA: 123, ID_PRODUTO: 1, NM_PRODUTO: "Smartphone Galaxy S21", QN_PRODUTO: 1 },
-            { ID_ITEM_PROCESSO_VENDA_PRODUTO: 2, ID_PROCESSO_VENDA: 123, ID_PRODUTO: 2, NM_PRODUTO: "Capa protetora", QN_PRODUTO: 2 },
+            { ID_ITEM_PROCESSO_VENDA_PRODUTO: 1, ID_PROCESSO_VENDA: 123, ID_PRODUTO: 10001, NM_PRODUTO: "Smartphone Galaxy S21", QN_PRODUTO: 1 },
+            { ID_ITEM_PROCESSO_VENDA_PRODUTO: 2, ID_PROCESSO_VENDA: 123, ID_PRODUTO: 10002, NM_PRODUTO: "Capa protetora", QN_PRODUTO: 2 },
           ]
         },
         {
@@ -59,9 +59,9 @@ export default function DeliveryEvidencies() {
           ID_PROCESSO_VENDA: 124,
           DOC_CLIENTE: "987.654.321-00",
           ITENS: [
-            { ID_ITEM_PROCESSO_VENDA_PRODUTO: 3, ID_PROCESSO_VENDA: 124, ID_PRODUTO: 3, NM_PRODUTO: "Notebook Dell Inspiron", QN_PRODUTO: 1 },
-            { ID_ITEM_PROCESSO_VENDA_PRODUTO: 4, ID_PROCESSO_VENDA: 124, ID_PRODUTO: 4, NM_PRODUTO: "Mouse sem fio", QN_PRODUTO: 1 },
-            { ID_ITEM_PROCESSO_VENDA_PRODUTO: 5, ID_PROCESSO_VENDA: 124, ID_PRODUTO: 5, NM_PRODUTO: "Mochila para notebook", QN_PRODUTO: 1 },
+            { ID_ITEM_PROCESSO_VENDA_PRODUTO: 3, ID_PROCESSO_VENDA: 124, ID_PRODUTO: 20001, NM_PRODUTO: "Notebook Dell Inspiron", QN_PRODUTO: 1 },
+            { ID_ITEM_PROCESSO_VENDA_PRODUTO: 4, ID_PROCESSO_VENDA: 124, ID_PRODUTO: 20002, NM_PRODUTO: "Mouse sem fio", QN_PRODUTO: 1 },
+            { ID_ITEM_PROCESSO_VENDA_PRODUTO: 5, ID_PROCESSO_VENDA: 124, ID_PRODUTO: 20003, NM_PRODUTO: "Mochila para notebook", QN_PRODUTO: 1 },
           ]
         },
         {
@@ -71,8 +71,8 @@ export default function DeliveryEvidencies() {
           ID_PROCESSO_VENDA: 125,
           DOC_CLIENTE: "456.789.123-00",
           ITENS: [
-            { ID_ITEM_PROCESSO_VENDA_PRODUTO: 6, ID_PROCESSO_VENDA: 125, ID_PRODUTO: 6, NM_PRODUTO: "Smart TV 55\"", QN_PRODUTO: 1 },
-            { ID_ITEM_PROCESSO_VENDA_PRODUTO: 7, ID_PROCESSO_VENDA: 125, ID_PRODUTO: 7, NM_PRODUTO: "Soundbar", QN_PRODUTO: 1 },
+            { ID_ITEM_PROCESSO_VENDA_PRODUTO: 6, ID_PROCESSO_VENDA: 125, ID_PRODUTO: 30001, NM_PRODUTO: "Smart TV 55\"", QN_PRODUTO: 1 },
+            { ID_ITEM_PROCESSO_VENDA_PRODUTO: 7, ID_PROCESSO_VENDA: 125, ID_PRODUTO: 30002, NM_PRODUTO: "Soundbar", QN_PRODUTO: 1 },
           ]
         },
         {
@@ -82,10 +82,10 @@ export default function DeliveryEvidencies() {
           ID_PROCESSO_VENDA: 126,
           DOC_CLIENTE: "789.123.456-00",
           ITENS: [
-            { ID_ITEM_PROCESSO_VENDA_PRODUTO: 8, ID_PROCESSO_VENDA: 126, ID_PRODUTO: 8, NM_PRODUTO: "Câmera DSLR", QN_PRODUTO: 1 },
-            { ID_ITEM_PROCESSO_VENDA_PRODUTO: 9, ID_PROCESSO_VENDA: 126, ID_PRODUTO: 9, NM_PRODUTO: "Lente 50mm", QN_PRODUTO: 1 },
-            { ID_ITEM_PROCESSO_VENDA_PRODUTO: 10, ID_PROCESSO_VENDA: 126, ID_PRODUTO: 10, NM_PRODUTO: "Tripé", QN_PRODUTO: 1 },
-            { ID_ITEM_PROCESSO_VENDA_PRODUTO: 11, ID_PROCESSO_VENDA: 126, ID_PRODUTO: 11, NM_PRODUTO: "Cartão de memória 64GB", QN_PRODUTO: 2 },
+            { ID_ITEM_PROCESSO_VENDA_PRODUTO: 8, ID_PROCESSO_VENDA: 126, ID_PRODUTO: 40001, NM_PRODUTO: "Câmera DSLR", QN_PRODUTO: 1 },
+            { ID_ITEM_PROCESSO_VENDA_PRODUTO: 9, ID_PROCESSO_VENDA: 126, ID_PRODUTO: 40002, NM_PRODUTO: "Lente 50mm", QN_PRODUTO: 1 },
+            { ID_ITEM_PROCESSO_VENDA_PRODUTO: 10, ID_PROCESSO_VENDA: 126, ID_PRODUTO: 40003, NM_PRODUTO: "Tripé", QN_PRODUTO: 1 },
+            { ID_ITEM_PROCESSO_VENDA_PRODUTO: 11, ID_PROCESSO_VENDA: 126, ID_PRODUTO: 40004, NM_PRODUTO: "Cartão de memória 64GB", QN_PRODUTO: 2 },
           ]
         },
         {
@@ -95,9 +95,9 @@ export default function DeliveryEvidencies() {
           ID_PROCESSO_VENDA: 127,
           DOC_CLIENTE: "321.654.987-00",
           ITENS: [
-            { ID_ITEM_PROCESSO_VENDA_PRODUTO: 12, ID_PROCESSO_VENDA: 127, ID_PRODUTO: 12, NM_PRODUTO: "Console PlayStation 5", QN_PRODUTO: 1 },
-            { ID_ITEM_PROCESSO_VENDA_PRODUTO: 13, ID_PROCESSO_VENDA: 127, ID_PRODUTO: 13, NM_PRODUTO: "Controle extra", QN_PRODUTO: 1 },
-            { ID_ITEM_PROCESSO_VENDA_PRODUTO: 14, ID_PROCESSO_VENDA: 127, ID_PRODUTO: 14, NM_PRODUTO: "Jogo FIFA 23", QN_PRODUTO: 1 },
+            { ID_ITEM_PROCESSO_VENDA_PRODUTO: 12, ID_PROCESSO_VENDA: 127, ID_PRODUTO: 50001, NM_PRODUTO: "Console PlayStation 5", QN_PRODUTO: 1 },
+            { ID_ITEM_PROCESSO_VENDA_PRODUTO: 13, ID_PROCESSO_VENDA: 127, ID_PRODUTO: 50002, NM_PRODUTO: "Controle extra", QN_PRODUTO: 1 },
+            { ID_ITEM_PROCESSO_VENDA_PRODUTO: 14, ID_PROCESSO_VENDA: 127, ID_PRODUTO: 50003, NM_PRODUTO: "Jogo FIFA 23", QN_PRODUTO: 1 },
           ]
         },
       ];
@@ -158,8 +158,11 @@ export default function DeliveryEvidencies() {
               <View style={styles.itensList}>
                 {pedido.ITENS.map((item, itemIndex) => (
                   <View key={itemIndex} style={styles.itemRow}>
+                    <View style={styles.itemNameContainer}>
+                      <ThemedText style={styles.itemCode}>{item.ID_PRODUTO} - </ThemedText>
+                      <ThemedText style={styles.itemName}>{item.NM_PRODUTO}</ThemedText>
+                    </View>
                     <ThemedText style={styles.itemQuantity}>{item.QN_PRODUTO}x</ThemedText>
-                    <ThemedText style={styles.itemName}>{item.NM_PRODUTO}</ThemedText>
                   </View>
                 ))}
               </View>
@@ -258,16 +261,29 @@ const styles = StyleSheet.create({
   itemRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: 5,
+  },
+  itemNameContainer: {
+    flexDirection: 'row',
+    flex: 1,
+    alignItems: 'center',
+  },
+  itemCode: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#666',
+    marginRight: 5,
+  },
+  itemName: {
+    fontSize: 14,
+    flex: 1,
   },
   itemQuantity: {
     fontSize: 14,
     fontWeight: 'bold',
-    marginRight: 10,
     minWidth: 30,
-  },
-  itemName: {
-    fontSize: 14,
+    textAlign: 'right',
   },
   photoButtonsContainer: {
     flexDirection: 'row',
