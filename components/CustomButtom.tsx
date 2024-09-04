@@ -1,16 +1,25 @@
 import React from 'react';
-import { Text, TouchableOpacity, StyleSheet, GestureResponderEvent } from 'react-native';
+import { Text, TouchableOpacity, StyleSheet, GestureResponderEvent, ViewStyle } from 'react-native';
 
 interface CustomButtonProps {
     title: string;
     onPress: (event: GestureResponderEvent) => void;
-    style?: React.CSSProperties | object;    
-  }
+    style?: ViewStyle;
+    disabled?: boolean;
+}
 
-export function CustomButton({ title, onPress, style }: CustomButtonProps) {
+export function CustomButton({ title, onPress, style, disabled }: CustomButtonProps) {
   return (
-    <TouchableOpacity style={[style, styles.button, ,  ]} onPress={onPress}>
-      <Text style={styles.buttonText}>{title}</Text>
+    <TouchableOpacity 
+      style={[
+        styles.button, 
+        style, 
+        disabled && styles.disabledButton
+      ]} 
+      onPress={onPress}
+      disabled={disabled}
+    >
+      <Text style={[styles.buttonText, disabled && styles.disabledText]}>{title}</Text>
     </TouchableOpacity>
   );
 }
@@ -29,5 +38,12 @@ const styles = StyleSheet.create({
     color: '#FFFFFF', 
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  disabledButton: {
+    backgroundColor: '#a0a0a0', // Cor mais clara para indicar que está desabilitado
+    opacity: 0.7,
+  },
+  disabledText: {
+    color: '#e0e0e0', // Cor mais clara para o texto quando desabilitado
   },
 });

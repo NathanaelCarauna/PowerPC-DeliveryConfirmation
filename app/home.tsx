@@ -105,6 +105,8 @@ export default function Home() {
     );
   }
 
+  const hasPedidos = state.pedidos.length > 0;
+
   return (
     <ThemedView style={styles.container}>
       <LogoBackground />
@@ -134,7 +136,12 @@ export default function Home() {
 
       <ThemedView style={styles.content}>
         <ThemedTable data={state.pedidos} onRemoveItem={handleRemoveItem} />
-        <CustomButton title="Entregar" onPress={handleDelivery} />
+        <CustomButton 
+          title="Entregar" 
+          onPress={handleDelivery}
+          disabled={!hasPedidos}
+          style={!hasPedidos ? styles.disabledButton : {}}
+        />
       </ThemedView>
     </ThemedView>
   );
@@ -193,5 +200,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'stretch',
     backgroundColor: 'transparent',
+  },
+  disabledButton: {
+    opacity: 0.5,
   },
 });
