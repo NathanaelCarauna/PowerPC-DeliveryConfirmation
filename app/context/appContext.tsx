@@ -29,10 +29,19 @@ export type Pedido = {
   }>;
 };
 
+type FotoTipo = 'produto' | 'documento' | 'canhoto';
+
+type Fotos = {
+  produto?: string;
+  documento?: string;
+  canhoto?: string;
+};
+
 type AppState = {
   user: User | null;
   pedidos: Pedido[];
   assinaturas: Record<number, string>;
+  fotos: Record<number, Fotos>;
   selectedFilial: RetornoFilialDto | null;
 };
 
@@ -42,7 +51,9 @@ type Action =
   | { type: 'ADD_PEDIDO'; payload: Pedido }
   | { type: 'REMOVE_PEDIDO'; payload: number } // Novo tipo de ação
   | { type: 'ADD_ASSINATURA'; payload: { pedidoId: number; assinatura: string } }
-  | { type: 'SET_SELECTED_FILIAL'; payload: RetornoFilialDto | null };
+  | { type: 'SET_SELECTED_FILIAL'; payload: RetornoFilialDto | null }
+  | { type: 'ADD_FOTO'; payload: { pedidoId: number; tipo: FotoTipo; foto: string } }
+  | { type: 'GENERATE_PDF'; payload: number };
 
 // Crie o contexto
 const AppContext = createContext<{
@@ -52,6 +63,9 @@ const AppContext = createContext<{
   fetchPedido: (idPedido: number) => Promise<void>;
   removePedido: (idPedido: number) => void;
   getPedidos: () => Pedido[]; // Nova função
+  addFoto: (pedidoId: number, tipo: FotoTipo, foto: string) => void;
+  addAssinatura: (pedidoId: number, assinatura: string) => void;
+  generatePDF: (pedidoId: number) => Promise<void>;
 } | undefined>(undefined);
 
 // Crie o reducer
@@ -88,6 +102,22 @@ function appReducer(state: AppState, action: Action): AppState {
     case 'SET_SELECTED_FILIAL':
       console.log("AppContext - Reducer - Atualizando filial selecionada:", action.payload);
       return { ...state, selectedFilial: action.payload };
+    case 'ADD_FOTO':
+      console.log(`AppContext - Reducer - Adicionando foto ${action.payload.tipo} para o pedido:`, action.payload.pedidoId);
+      return {
+        ...state,
+        fotos: {
+          ...state.fotos,
+          [action.payload.pedidoId]: {
+            ...(state.fotos[action.payload.pedidoId] || {}),
+            [action.payload.tipo]: action.payload.foto,
+          },
+        },
+      };
+    case 'GENERATE_PDF':
+      console.log("AppContext - Reducer - Gerando PDF para o pedido:", action.payload);
+      // Aqui você pode adicionar lógica adicional se necessário
+      return state;
     default:
       console.log("AppContext - Reducer - Ação desconhecida:", action);
       return state;
@@ -101,6 +131,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     user: null,
     pedidos: [],
     assinaturas: {},
+    fotos: {},
     selectedFilial: null,
   });
 
@@ -168,10 +199,48 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return state.pedidos;
   };
 
+  const addFoto = (pedidoId: number, tipo: FotoTipo, foto: string) => {
+    console.log(`AppContext - Adicionando foto ${tipo} ao pedido:`, pedidoId);
+    dispatch({
+      type: 'ADD_FOTO',
+      payload: { pedidoId, tipo, foto },
+    });
+  };
+
+  const addAssinatura = (pedidoId: number, assinatura: string) => {
+    console.log("AppContext - Adicionando assinatura ao pedido:", pedidoId);
+    dispatch({
+      type: 'ADD_ASSINATURA',
+      payload: { pedidoId, assinatura },
+    });
+  };
+
+  const generatePDF = async (pedidoId: number) => {
+    console.log("AppContext - Gerando PDF para o pedido:", pedidoId);
+    dispatch({
+      type: 'GENERATE_PDF',
+      payload: pedidoId,
+    });
+    
+    const pedido = state.pedidos.find(p => p.ID_PEDIDO === pedidoId);
+    const assinatura = state.assinaturas[pedidoId];
+    const fotos = state.fotos[pedidoId] || {};
+
+    if (!pedido || !assinatura || !fotos.produto || !fotos.documento || !fotos.canhoto) {
+      console.error("AppContext - Dados insuficientes para gerar o PDF");
+      throw new Error('Dados insuficientes para gerar o PDF');
+    }
+
+    // Aqui você implementaria a lógica para gerar o PDF
+    // Por exemplo, usando uma biblioteca como jsPDF ou react-pdf
+    // Esta é uma implementação simulada
+    await simulateGeneratePDF(pedido, assinatura, fotos);
+  };
+
   console.log("AppContext - Estado atual:", state);
 
   return (
-    <AppContext.Provider value={{ state, dispatch, login, fetchPedido, removePedido, getPedidos }}>
+    <AppContext.Provider value={{ state, dispatch, login, fetchPedido, removePedido, getPedidos, addFoto, addAssinatura, generatePDF }}>
       {children}
     </AppContext.Provider>
   );
@@ -234,4 +303,13 @@ async function simulateFetchPedido(idPedido: number): Promise<Pedido> {
   };
   console.log("AppContext - Resposta simulada da API para busca de pedido:", pedido);
   return pedido;
+}
+
+// Função auxiliar para simular a geração de PDF
+async function simulateGeneratePDF(pedido: Pedido, assinatura: string, fotos: Fotos) {
+  console.log("AppContext - Simulando geração de PDF");
+  await new Promise(resolve => setTimeout(resolve, 2000));
+  console.log("AppContext - PDF gerado com sucesso para o pedido:", pedido.ID_PEDIDO);
+  console.log("AppContext - Fotos incluídas:", Object.keys(fotos));
+  console.log("AppContext - Assinatura incluída:", assinatura ? "Sim" : "Não");
 }

@@ -1,24 +1,19 @@
-import { useState } from 'react';
-import { TouchableOpacity, Image, Alert, ScrollView, StyleSheet, View } from 'react-native';
+import { TouchableOpacity, Alert, ScrollView, StyleSheet, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { CustomButton } from "@/components/CustomButtom";
 import LogoBackground from "@/components/LogoBackground";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { useRouter } from "expo-router";
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useAppContext } from './context/appContext';
 
 export default function DeliveryEvidencies() {
   const router = useRouter();
-  const { state } = useAppContext();
+  const { state, addFoto } = useAppContext();
   const pedidos = state.pedidos;
 
-  const [docPhoto, setDocPhoto] = useState<string | null>(null);
-  const [canhotoPhoto, setCanhotoPhoto] = useState<string | null>(null);
-  const [productPhoto, setProductPhoto] = useState<string | null>(null);
-
-  async function openCamera(setPhoto: React.Dispatch<React.SetStateAction<string | null>>) {
+  async function openCamera(tipo: 'documento' | 'canhoto' | 'produto') {
     let result = await ImagePicker.launchCameraAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -27,20 +22,40 @@ export default function DeliveryEvidencies() {
     });
 
     if (!result.canceled && result.assets && result.assets.length > 0) {
-      setPhoto(result.assets[0].uri);
+      // Aplicar a foto apenas aos pedidos que não possuem foto deste tipo
+      pedidos.forEach(pedido => {
+        const pedidoFotos = state.fotos[pedido.ID_PEDIDO];
+        if (!pedidoFotos || !pedidoFotos[tipo]) {
+          addFoto(pedido.ID_PEDIDO, tipo, result.assets[0].uri);
+        }
+      });
     } else {
       Alert.alert('Aviso', 'A captura de imagem foi cancelada.');
     }
   }
 
   function handleSignPress() {
-    if (docPhoto && canhotoPhoto && productPhoto) {
+    if (allPhotosPresent) {
       console.log("Assinatura permitida");
       router.push('/documentPreview');
     } else {
-      Alert.alert('Aviso', 'Todas as fotos são obrigatórias.');
+      Alert.alert('Aviso', 'Todas as fotos são obrigatórias para todos os pedidos.');
     }
   }
+
+  const hasAllPhotos = (pedidoId: number) => {
+    const fotos = state.fotos[pedidoId];
+    return fotos && fotos.documento && fotos.canhoto && fotos.produto;
+  };
+
+  const allPhotosPresent = pedidos.every(pedido => hasAllPhotos(pedido.ID_PEDIDO));
+
+  const anyPedidoMissingPhoto = (tipo: 'documento' | 'canhoto' | 'produto') => {
+    return pedidos.some(pedido => {
+      const fotos = state.fotos[pedido.ID_PEDIDO];
+      return !fotos || !fotos[tipo];
+    });
+  };
 
   return (
     <ThemedView style={styles.container}>
@@ -53,7 +68,12 @@ export default function DeliveryEvidencies() {
             <View key={pedido.ID_PEDIDO} style={styles.pedidoCard}>
               <View style={styles.pedidoHeader}>
                 <ThemedText style={styles.clienteName}>{pedido.NM_CLIENTE}</ThemedText>
-                <ThemedText style={styles.pedidoId}>Pedido #{pedido.ID_PEDIDO}</ThemedText>
+                <View style={styles.pedidoIdContainer}>
+                  <ThemedText style={styles.pedidoId}>Pedido #{pedido.ID_PEDIDO}</ThemedText>
+                  {hasAllPhotos(pedido.ID_PEDIDO) && (
+                    <MaterialIcons name="check-circle" size={20} color="green" style={styles.checkIcon} />
+                  )}
+                </View>
               </View>
               <View style={styles.pedidoInfo}>
                 <View style={styles.infoRow}>
@@ -82,18 +102,18 @@ export default function DeliveryEvidencies() {
       </ScrollView>
 
       <View style={styles.photoButtonsContainer}>
-        <TouchableOpacity onPress={() => openCamera(setDocPhoto)} style={styles.photoButton}>
-          <Ionicons name={docPhoto ? "checkmark-circle" : "document-text-outline"} size={24} color="#fff" />
+        <TouchableOpacity onPress={() => openCamera('documento')} style={styles.photoButton}>
+          <Ionicons name={anyPedidoMissingPhoto('documento') ? "document-text-outline" : "checkmark-circle"} size={24} color="#fff" />
           <ThemedText style={styles.buttonText}>Documento</ThemedText>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => openCamera(setCanhotoPhoto)} style={styles.photoButton}>
-          <Ionicons name={canhotoPhoto ? "checkmark-circle" : "receipt-outline"} size={24} color="#fff" />
+        <TouchableOpacity onPress={() => openCamera('canhoto')} style={styles.photoButton}>
+          <Ionicons name={anyPedidoMissingPhoto('canhoto') ? "receipt-outline" : "checkmark-circle"} size={24} color="#fff" />
           <ThemedText style={styles.buttonText}>Canhoto</ThemedText>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => openCamera(setProductPhoto)} style={styles.photoButton}>
-          <Ionicons name={productPhoto ? "checkmark-circle" : "cube-outline"} size={24} color="#fff" />
+        <TouchableOpacity onPress={() => openCamera('produto')} style={styles.photoButton}>
+          <Ionicons name={anyPedidoMissingPhoto('produto') ? "cube-outline" : "checkmark-circle"} size={24} color="#fff" />
           <ThemedText style={styles.buttonText}>Produto</ThemedText>
         </TouchableOpacity>
       </View>
@@ -102,6 +122,7 @@ export default function DeliveryEvidencies() {
         title="Assinar e Finalizar" 
         onPress={handleSignPress}
         style={styles.signButton}
+        disabled={!allPhotosPresent}
       />
     </ThemedView>
   );
@@ -216,5 +237,15 @@ const styles = StyleSheet.create({
   signButton: {
     backgroundColor: '#28a745',
     paddingVertical: 15,
+  },
+  pedidoIdContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  checkIcon: {
+    marginLeft: 5,
+  },
+  disabledButton: {
+    opacity: 0.5,
   },
 });

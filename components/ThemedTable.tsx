@@ -1,8 +1,10 @@
-import React from 'react';
-import { FlatList, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
+import React, { useState, useEffect } from 'react';
+import { FlatList, StyleSheet, Text, View, TouchableOpacity, Modal, Alert } from 'react-native';
+import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import { Pedido } from '@/app/context/appContext';
-
+import * as ImagePicker from 'expo-image-picker';
+import { ThemedText } from "@/components/ThemedText";
+import { useAppContext } from '@/app/context/appContext';
 
 type ThemedTableProps = {
   data: Pedido[];
@@ -10,6 +12,61 @@ type ThemedTableProps = {
 };
 
 export function ThemedTable({ data, onRemoveItem }: ThemedTableProps) {
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedPedidoId, setSelectedPedidoId] = useState<number | null>(null);
+  const { addFoto, state } = useAppContext();
+
+  const [docPhoto, setDocPhoto] = useState<string | null>(null);
+  const [canhotoPhoto, setCanhotoPhoto] = useState<string | null>(null);
+  const [productPhoto, setProductPhoto] = useState<string | null>(null);
+
+  const openCamera = async (setPhoto: React.Dispatch<React.SetStateAction<string | null>>, tipo: 'documento' | 'canhoto' | 'produto') => {
+    let result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      setPhoto(result.assets[0].uri);
+      if (selectedPedidoId !== null) {
+        addFoto(selectedPedidoId, tipo, result.assets[0].uri);
+      }
+    } else {
+      Alert.alert('Aviso', 'A captura de imagem foi cancelada.');
+    }
+  };
+
+  const handlePhotoPress = (pedidoId: number) => {
+    setSelectedPedidoId(pedidoId);
+    setModalVisible(true);
+  };
+
+  const closeModal = () => {
+    setModalVisible(false);
+    setDocPhoto(null);
+    setCanhotoPhoto(null);
+    setProductPhoto(null);
+    setSelectedPedidoId(null);
+  };
+
+  const hasAllPhotos = (pedidoId: number) => {
+    const fotos = state.fotos[pedidoId];
+    return fotos && fotos.documento && fotos.canhoto && fotos.produto;
+  };
+
+  useEffect(() => {
+    if (selectedPedidoId) {
+      const fotos = state.fotos[selectedPedidoId];
+      if (fotos) {
+        setDocPhoto(fotos.documento || null);
+        setCanhotoPhoto(fotos.canhoto || null);
+        setProductPhoto(fotos.produto || null);
+      }
+    }
+  }, [selectedPedidoId, state.fotos]);
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -33,8 +90,12 @@ export function ThemedTable({ data, onRemoveItem }: ThemedTableProps) {
               <Text style={styles.cell}>{new Date(item.DT_PEDIDO).toLocaleDateString()}</Text>
             </View>
             <View style={styles.operationsColumn}>
-              <TouchableOpacity onPress={() => console.log('Foto clicada para', item.ID_PEDIDO)}>
-                <MaterialIcons name="photo-camera" size={20} color="black" />
+              <TouchableOpacity onPress={() => handlePhotoPress(item.ID_PEDIDO)}>
+                {hasAllPhotos(item.ID_PEDIDO) ? (
+                  <MaterialIcons name="check-circle" size={20} color="green" />
+                ) : (
+                  <MaterialIcons name="photo-camera" size={20} color="black" />
+                )}
               </TouchableOpacity>
               <TouchableOpacity onPress={() => onRemoveItem(item.ID_PEDIDO)}>
                 <MaterialIcons name="delete" size={20} color="red" />
@@ -43,6 +104,38 @@ export function ThemedTable({ data, onRemoveItem }: ThemedTableProps) {
           </View>
         )}
       />
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={closeModal}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <ThemedText style={styles.modalTitle}>Capturar Fotos</ThemedText>
+            <View style={styles.photoButtonsContainer}>
+              <TouchableOpacity onPress={() => openCamera(setDocPhoto, 'documento')} style={styles.photoButton}>
+                <Ionicons name={docPhoto ? "checkmark-circle" : "document-text-outline"} size={24} color="#fff" />
+                <ThemedText style={styles.buttonText}>Documento</ThemedText>
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={() => openCamera(setCanhotoPhoto, 'canhoto')} style={styles.photoButton}>
+                <Ionicons name={canhotoPhoto ? "checkmark-circle" : "receipt-outline"} size={24} color="#fff" />
+                <ThemedText style={styles.buttonText}>Canhoto</ThemedText>
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={() => openCamera(setProductPhoto, 'produto')} style={styles.photoButton}>
+                <Ionicons name={productPhoto ? "checkmark-circle" : "cube-outline"} size={24} color="#fff" />
+                <ThemedText style={styles.buttonText}>Produto</ThemedText>
+              </TouchableOpacity>
+            </View>
+            <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
+              <ThemedText style={styles.closeButtonText}>Fechar</ThemedText>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -100,5 +193,50 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-evenly',
     alignItems: 'center',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 20,
+    width: '90%',
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  photoButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  photoButton: {
+    backgroundColor: '#0f3a6d',
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    flex: 1,
+    marginHorizontal: 5,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 12,
+    marginTop: 5,
+  },
+  closeButton: {
+    backgroundColor: '#28a745',
+    padding: 10,
+    borderRadius: 5,
+  },
+  closeButtonText: {
+    color: '#fff',
+    fontSize: 16,
   },
 });
