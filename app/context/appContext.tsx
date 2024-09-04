@@ -50,7 +50,7 @@ type Action =
   | { type: 'SET_PEDIDOS'; payload: Pedido[] }
   | { type: 'ADD_PEDIDO'; payload: Pedido }
   | { type: 'REMOVE_PEDIDO'; payload: number } // Novo tipo de ação
-  | { type: 'ADD_ASSINATURA'; payload: { pedidoId: number; assinatura: string } }
+  | { type: 'ADD_ASSINATURA'; payload: string }
   | { type: 'SET_SELECTED_FILIAL'; payload: RetornoFilialDto | null }
   | { type: 'ADD_FOTO'; payload: { pedidoId: number; tipo: FotoTipo; foto: string } }
   | { type: 'GENERATE_PDF'; payload: number };
@@ -64,7 +64,7 @@ const AppContext = createContext<{
   removePedido: (idPedido: number) => void;
   getPedidos: () => Pedido[]; // Nova função
   addFoto: (pedidoId: number, tipo: FotoTipo, foto: string) => void;
-  addAssinatura: (pedidoId: number, assinatura: string) => void;
+  addAssinatura: (assinatura: string) => void;
   generatePDF: (pedidoId: number) => Promise<void>;
 } | undefined>(undefined);
 
@@ -91,13 +91,14 @@ function appReducer(state: AppState, action: Action): AppState {
         pedidos: state.pedidos.filter(pedido => pedido.ID_PEDIDO !== action.payload)
       };
     case 'ADD_ASSINATURA':
-      console.log("AppContext - Reducer - Adicionando assinatura para o pedido:", action.payload.pedidoId);
+      console.log("AppContext - Reducer - Adicionando assinatura para todos os pedidos");
+      const newAssinaturas = state.pedidos.reduce((acc, pedido) => {
+        acc[pedido.ID_PEDIDO] = action.payload;
+        return acc;
+      }, {} as Record<number, string>);
       return {
         ...state,
-        assinaturas: {
-          ...state.assinaturas,
-          [action.payload.pedidoId]: action.payload.assinatura,
-        },
+        assinaturas: newAssinaturas,
       };
     case 'SET_SELECTED_FILIAL':
       console.log("AppContext - Reducer - Atualizando filial selecionada:", action.payload);
@@ -207,11 +208,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const addAssinatura = (pedidoId: number, assinatura: string) => {
-    console.log("AppContext - Adicionando assinatura ao pedido:", pedidoId);
+  const addAssinatura = (assinatura: string) => {
+    console.log("AppContext - Adicionando assinatura a todos os pedidos");
     dispatch({
       type: 'ADD_ASSINATURA',
-      payload: { pedidoId, assinatura },
+      payload: assinatura,
     });
   };
 

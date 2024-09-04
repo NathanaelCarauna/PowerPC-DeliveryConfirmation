@@ -5,9 +5,11 @@ import { CustomButton } from "@/components/CustomButtom";
 import { ThemedView } from "@/components/ThemedView";
 import { useRouter } from "expo-router";
 import * as ScreenOrientation from 'expo-screen-orientation';
+import { useAppContext } from './context/appContext';
 
 export default function SignatureScreen() {
   const router = useRouter();
+  const { addAssinatura } = useAppContext();
   const signatureRef = useRef<SignatureViewRef>(null);
   const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
   const [isLoading, setIsLoading] = useState(false);
@@ -36,6 +38,9 @@ export default function SignatureScreen() {
     if (signature) {
       setIsLoading(true);
       try {
+        // Adicionar a assinatura ao contexto
+        addAssinatura(signature);
+        
         // Simular uma requisição
         await new Promise(resolve => setTimeout(resolve, 2000));
         
@@ -43,12 +48,11 @@ export default function SignatureScreen() {
         router.push('/deliveryCompleted');
       } catch (error) {
         console.error("Erro ao processar a assinatura:", error);
-        // Aqui você pode adicionar um tratamento de erro, se necessário
+        Alert.alert('Erro', 'Ocorreu um erro ao processar a assinatura. Por favor, tente novamente.');
       } finally {
         setIsLoading(false);
       }
     } else {
-      // Manter o alerta para assinatura vazia
       Alert.alert('Erro', 'Por favor, forneça uma assinatura.');
     }
   };
@@ -107,7 +111,7 @@ export default function SignatureScreen() {
           title={isLoading ? "Enviando..." : "Confirmar"} 
           onPress={handleConfirm} 
           style={styles.button}
-          // disabled={isLoading}
+          disabled={isLoading}
         />
       </View>
     </ThemedView>
