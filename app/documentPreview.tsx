@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View, Image } from 'react-native';
 import { CustomButton } from "@/components/CustomButtom";
 import LogoBackground from "@/components/LogoBackground";
 import { ThemedText } from "@/components/ThemedText";
@@ -57,6 +57,28 @@ export default function DocumentPreview() {
                   <ThemedText style={styles.itemQuantity}>{item.QN_PRODUTO}x</ThemedText>
                 </View>
               ))}
+            </View>
+
+            <ThemedText style={styles.subheading}>Fotos:</ThemedText>
+            <View style={styles.photosContainer}>
+              {state.fotos[pedido.ID_PEDIDO]?.documento && (
+                <View style={styles.photoItem}>
+                  <Image source={{ uri: state.fotos[pedido.ID_PEDIDO].documento }} style={styles.photoThumbnail} />
+                  <ThemedText style={styles.photoLabel}>Documento</ThemedText>
+                </View>
+              )}
+              {state.fotos[pedido.ID_PEDIDO]?.canhoto && (
+                <View style={styles.photoItem}>
+                  <Image source={{ uri: state.fotos[pedido.ID_PEDIDO].canhoto }} style={styles.photoThumbnail} />
+                  <ThemedText style={styles.photoLabel}>Canhoto</ThemedText>
+                </View>
+              )}
+              {state.fotos[pedido.ID_PEDIDO]?.produto && (
+                <View style={styles.photoItem}>
+                  <Image source={{ uri: state.fotos[pedido.ID_PEDIDO].produto }} style={styles.photoThumbnail} />
+                  <ThemedText style={styles.photoLabel}>Produto</ThemedText>
+                </View>
+              )}
             </View>
 
             <ThemedText style={styles.confirmationText}>
@@ -169,6 +191,25 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontStyle: 'italic',
     textAlign: 'center',
+    color: '#666',
+  },
+  photosContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: 10,
+    marginBottom: 20,
+  },
+  photoItem: {
+    alignItems: 'center',
+  },
+  photoThumbnail: {
+    width: 80,
+    height: 80,
+    borderRadius: 5,
+    marginBottom: 5,
+  },
+  photoLabel: {
+    fontSize: 12,
     color: '#666',
   },
 });
