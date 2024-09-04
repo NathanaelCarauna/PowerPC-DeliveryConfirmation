@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { GestureResponderEvent, StyleSheet, View, Keyboard, Button, Alert } from 'react-native';
+import { GestureResponderEvent, StyleSheet, View, Keyboard, Button, Alert, ActivityIndicator } from 'react-native';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { Camera, CameraType, CameraView } from 'expo-camera';
 import { CustomButton } from "@/components/CustomButtom";
@@ -17,6 +17,7 @@ export default function Home() {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [scanning, setScanning] = useState(false);  
   const [searchQuery, setSearchQuery] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -34,6 +35,17 @@ export default function Home() {
       return;
     }
 
+    // Verifica se o pedido já existe na lista
+    const pedidoExistente = state.pedidos.find(p => p.ID_PEDIDO === pedidoId);
+    if (pedidoExistente) {
+      console.log("Home - Pedido já existe na lista:", pedidoId);
+      Alert.alert("Aviso", "Este pedido já está na lista.");
+      setSearchQuery('');
+      Keyboard.dismiss();
+      return;
+    }
+
+    setIsLoading(true);
     try {
       await fetchPedido(pedidoId);
       console.log("Home - Pedido buscado com sucesso");
@@ -42,6 +54,8 @@ export default function Home() {
     } catch (error) {
       console.error("Home - Erro ao buscar pedido:", error);
       Alert.alert("Erro", "Não foi possível buscar o pedido. Tente novamente.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -124,14 +138,19 @@ export default function Home() {
           onChangeText={setSearchQuery}
           placeholder="Buscar pedido"
           onSubmitEditing={e => handleSearch(e.nativeEvent.text)}
+          editable={!isLoading}
         />
-        <MaterialIcons
-          name="search"
-          size={20}
-          color="black"
-          onPress={() => handleSearch(searchQuery)}
-          style={styles.searchIcon}
-        />
+        {isLoading ? (
+          <ActivityIndicator size="small" color="#0000ff" style={styles.searchIcon} />
+        ) : (
+          <MaterialIcons
+            name="search"
+            size={20}
+            color="black"
+            onPress={() => handleSearch(searchQuery)}
+            style={styles.searchIcon}
+          />
+        )}
       </ThemedView>
 
       <ThemedView style={styles.content}>
@@ -139,8 +158,8 @@ export default function Home() {
         <CustomButton 
           title="Entregar" 
           onPress={handleDelivery}
-          disabled={!hasPedidos}
-          style={!hasPedidos ? styles.disabledButton : {}}
+          disabled={!hasPedidos || isLoading}
+          style={(!hasPedidos || isLoading) ? styles.disabledButton : {}}
         />
       </ThemedView>
     </ThemedView>
@@ -203,5 +222,12 @@ const styles = StyleSheet.create({
   },
   disabledButton: {
     opacity: 0.5,
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
   },
 });
