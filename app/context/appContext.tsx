@@ -1,12 +1,12 @@
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
 
 // Tipos
-type RetornoFilialDto = {
+export type RetornoFilialDto = {
   id: number;
   nome: string;
 };
 
-type User = {
+export type User = {
   username: string;
   authenticated: boolean;
   email: string;
@@ -14,7 +14,7 @@ type User = {
   filiais: RetornoFilialDto[];
 };
 
-type Pedido = {
+export type Pedido = {
   ID_PEDIDO: number;
   NM_CLIENTE: string;
   DT_PEDIDO: string;
@@ -51,6 +51,7 @@ const AppContext = createContext<{
   login: (username: string, password: string) => Promise<void>;
   fetchPedido: (idPedido: number) => Promise<void>;
   removePedido: (idPedido: number) => void;
+  getPedidos: () => Pedido[]; // Nova função
 } | undefined>(undefined);
 
 // Crie o reducer
@@ -161,10 +162,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  // Função para recuperar os pedidos
+  const getPedidos = () => {
+    console.log("AppContext - Recuperando pedidos");
+    return state.pedidos;
+  };
+
   console.log("AppContext - Estado atual:", state);
 
   return (
-    <AppContext.Provider value={{ state, dispatch, login, fetchPedido, removePedido }}>
+    <AppContext.Provider value={{ state, dispatch, login, fetchPedido, removePedido, getPedidos }}>
       {children}
     </AppContext.Provider>
   );

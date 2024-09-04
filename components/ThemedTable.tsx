@@ -1,21 +1,8 @@
 import React from 'react';
 import { FlatList, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { Pedido } from '@/app/context/appContext';
 
-type Pedido = {
-  ID_PEDIDO: number;
-  NM_CLIENTE: string;
-  DT_PEDIDO: string;
-  ID_PROCESSO_VENDA: number;
-  DOC_CLIENTE: string;
-  Itens: Array<{
-    ID_ITEM_PROCESSO_VENDA_PRODUTO: number;
-    ID_PROCESSO_VENDA: number;
-    ID_PRODUTO: number;
-    NM_PRODUTO: string;
-    QN_PRODUTO: number;
-  }>;
-};
 
 type ThemedTableProps = {
   data: Pedido[];

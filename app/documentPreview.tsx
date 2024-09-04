@@ -6,47 +6,12 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { useRouter } from "expo-router";
 import { Ionicons } from '@expo/vector-icons';
-
-// Exemplos de dados de pedidos atualizados
-const samplePedidos = [
-  {
-    ID_PEDIDO: 12345,
-    NM_CLIENTE: 'João Silva',
-    DT_PEDIDO: '2024-08-01T10:00:00',
-    ID_PROCESSO_VENDA: 9876,
-    DOC_CLIENTE: '123.456.789-00',
-    Itens: [
-      { ID_ITEM_PROCESSO_VENDA_PRODUTO: 1, ID_PROCESSO_VENDA: 9876, ID_PRODUTO: 10001, NM_PRODUTO: 'Smartphone Galaxy S21', QN_PRODUTO: 1 },
-      { ID_ITEM_PROCESSO_VENDA_PRODUTO: 2, ID_PROCESSO_VENDA: 9876, ID_PRODUTO: 10002, NM_PRODUTO: 'Capa protetora', QN_PRODUTO: 2 },
-    ],
-  },
-  {
-    ID_PEDIDO: 12346,
-    NM_CLIENTE: 'Maria Santos',
-    DT_PEDIDO: '2024-08-02T11:30:00',
-    ID_PROCESSO_VENDA: 9877,
-    DOC_CLIENTE: '987.654.321-00',
-    Itens: [
-      { ID_ITEM_PROCESSO_VENDA_PRODUTO: 3, ID_PROCESSO_VENDA: 9877, ID_PRODUTO: 20001, NM_PRODUTO: 'Notebook Dell Inspiron', QN_PRODUTO: 1 },
-      { ID_ITEM_PROCESSO_VENDA_PRODUTO: 4, ID_PROCESSO_VENDA: 9877, ID_PRODUTO: 20002, NM_PRODUTO: 'Mouse sem fio', QN_PRODUTO: 1 },
-      { ID_ITEM_PROCESSO_VENDA_PRODUTO: 5, ID_PROCESSO_VENDA: 9877, ID_PRODUTO: 20003, NM_PRODUTO: 'Mochila para notebook', QN_PRODUTO: 1 },
-    ],
-  },
-  {
-    ID_PEDIDO: 12347,
-    NM_CLIENTE: 'Carlos Ferreira',
-    DT_PEDIDO: '2024-08-03T14:15:00',
-    ID_PROCESSO_VENDA: 9878,
-    DOC_CLIENTE: '456.789.123-00',
-    Itens: [
-      { ID_ITEM_PROCESSO_VENDA_PRODUTO: 6, ID_PROCESSO_VENDA: 9878, ID_PRODUTO: 30001, NM_PRODUTO: 'Smart TV 55"', QN_PRODUTO: 1 },
-      { ID_ITEM_PROCESSO_VENDA_PRODUTO: 7, ID_PROCESSO_VENDA: 9878, ID_PRODUTO: 30002, NM_PRODUTO: 'Soundbar', QN_PRODUTO: 1 },
-    ],
-  },
-];
+import { useAppContext } from './context/appContext';
 
 export default function DocumentPreview() {
   const router = useRouter();
+  const { state } = useAppContext();
+  const pedidos = state.pedidos;
 
   function handlePress() {
     console.log("Assinar button pressed");
@@ -59,7 +24,7 @@ export default function DocumentPreview() {
       <ThemedText style={styles.title}>Confirmação de Recebimento</ThemedText>
 
       <ScrollView style={styles.scrollContainer}>
-        {samplePedidos.map((pedido, pedidoIndex) => (
+        {pedidos.map((pedido) => (
           <View key={pedido.ID_PEDIDO} style={styles.documentContainer}>
             <View style={styles.pedidoHeader}>
               <ThemedText style={styles.clienteName}>{pedido.NM_CLIENTE}</ThemedText>
