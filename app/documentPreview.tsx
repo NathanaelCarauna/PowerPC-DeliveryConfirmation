@@ -7,23 +7,36 @@ import { ThemedView } from "@/components/ThemedView";
 import { useRouter } from "expo-router";
 import { Ionicons } from '@expo/vector-icons';
 import { useAppContext } from './context/appContext';
+import { useState } from 'react';
 
 export default function DocumentPreview() {
   const router = useRouter();
   const { state } = useAppContext();
   const pedidos = state.pedidos;
+  const [isScrolledToEnd, setIsScrolledToEnd] = useState(false); // Adicione este estado
 
   function handlePress() {
     console.log("Assinar button pressed");
     router.push('/signatureScreen');
   }
 
+  // função para verificar se o usuário rolou até o final
+  const handleScroll = (event: any) => {
+    const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
+    const isEnd = layoutMeasurement.height + contentOffset.y >= contentSize.height - 20; // Ajuste a tolerância conforme necessário
+    setIsScrolledToEnd(isEnd);
+  };
+
   return (
     <ThemedView style={styles.container}>
-      <LogoBackground showLabel={false}/>
+      <LogoBackground showLabel={false} />
       <ThemedText style={styles.title}>Confirmação de Recebimento</ThemedText>
 
-      <ScrollView style={styles.scrollContainer}>
+      <ScrollView
+        style={styles.scrollContainer}
+        onScroll={handleScroll}
+        scrollEventThrottle={16} // Para melhor desempenho
+      >
         {pedidos.map((pedido) => (
           <View key={pedido.ID_PEDIDO} style={styles.documentContainer}>
             <View style={styles.pedidoHeader}>
@@ -86,11 +99,25 @@ export default function DocumentPreview() {
             </ThemedText>
           </View>
         ))}
+
+        {/* Card de informação dentro do ScrollView */}
+        <View style={styles.infoCard}>
+          <ThemedText style={styles.infoCardText}>
+            Prezado(a) {pedidos[0]?.NM_CLIENTE},
+            Informamos que a entrega da mercadoria foi realizada com sucesso na data de hoje, {new Date().toLocaleDateString()}, no endereço especificado na Nota Fiscal.
+            Para validar a conferência e o recebimento dos itens entregues, solicitamos gentilmente que seja feita a assinatura eletrônica no aplicativo, confirmando que tudo está conforme o pedido e em conformidade com as leis vigentes.
+            A assinatura eletrônica serve como comprovação de que a mercadoria foi devidamente conferida junto ao nosso motorista/conferente no momento da entrega, conforme os procedimentos legais em vigor.
+            Será necessário, também, que nos envie uma cópia de um documento com foto.
+            Gostaríamos de destacar que a coleta dos dados pessoais para esta confirmação de entrega será realizada de acordo com a Lei Geral de Proteção de Dados (LGPD). Garantimos que as informações fornecidas serão utilizadas exclusivamente para fins de registro e comprovação de entrega e não serão compartilhadas com terceiros sem o seu consentimento explícito.
+          </ThemedText>
+        </View>
+
       </ScrollView>
 
-      <CustomButton 
-        title="Assinar e Finalizar" 
-        onPress={handlePress}        
+      <CustomButton
+        title="Assinar e Finalizar"
+        onPress={handlePress}
+        disabled={!isScrolledToEnd} // Desabilita o botão se não rolou até o final
       />
     </ThemedView>
   );
@@ -211,5 +238,15 @@ const styles = StyleSheet.create({
   photoLabel: {
     fontSize: 12,
     color: '#666',
+  },
+  infoCard: {
+    backgroundColor: '#f0f0f0',
+    borderRadius: 10,
+    padding: 15,
+    marginBottom: 20,
+  },
+  infoCardText: {
+    fontSize: 14,
+    color: '#333',
   },
 });
