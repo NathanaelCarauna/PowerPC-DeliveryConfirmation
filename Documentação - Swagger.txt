@@ -1,0 +1,358 @@
+openapi: 3.0.1
+info:
+  title: PowerPCDeliveryAPI
+  version: '1.0'
+servers:
+  - url: http://localhost:8081
+    description: Generated server url
+tags:
+  - name: Usuário
+    description: Endpoints de usuário
+  - name: Authentication
+    description: Endpoints de autenticação
+  - name: Produto
+    description: Endpoints de produto
+  - name: Filial
+    description: Endpoints de filial
+  - name: Entrega
+    description: Endpoints de entrega
+  - name: Pedido
+    description: Endpoints de pedido
+paths:
+  /api/usuario/create:
+    post:
+      tags:
+        - Usuário
+      operationId: create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UsuarioDTO'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/UsuarioDTO'
+  /api/produto/create:
+    post:
+      tags:
+        - Produto
+      operationId: create_1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProdutoDTO'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProdutoDTO'
+  /api/pedido/create:
+    post:
+      tags:
+        - Pedido
+      operationId: create_2
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PedidoDTO'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PedidoDTO'
+  /api/filial/create:
+    post:
+      tags:
+        - Filial
+      operationId: create_3
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FilialDTO'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/FilialDTO'
+  /api/entrega/create:
+    post:
+      tags:
+        - Entrega
+      operationId: create_4
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EntregaDTO'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/EntregaResponseDTO'
+  /api/authentication/login:
+    post:
+      tags:
+        - Authentication
+      operationId: login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginDTO'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/UsuarioLoginResponseDTO'
+  /api/usuario/listAll:
+    get:
+      tags:
+        - Usuário
+      operationId: listAll
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UsuarioDTO'
+  /api/produto/listAll:
+    get:
+      tags:
+        - Produto
+      operationId: listAll_1
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProdutoDTO'
+  /api/pedido/pedidoById/{id}:
+    get:
+      tags:
+        - Pedido
+      operationId: pedidoById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PedidoDTO'
+  /api/pedido/listAll:
+    get:
+      tags:
+        - Pedido
+      operationId: listAll_2
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PedidoDTO'
+  /api/filial/listAll:
+    get:
+      tags:
+        - Filial
+      operationId: listAll_3
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FilialDTO'
+  /api/entrega/listByEntregador:
+    get:
+      tags:
+        - Entrega
+      operationId: listByUsuario
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EntregaResponseDTO'
+  /api/entrega/listAll:
+    get:
+      tags:
+        - Entrega
+      operationId: listAll_4
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EntregaResponseDTO'
+components:
+  schemas:
+    UsuarioDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        name:
+          type: string
+        email:
+          type: string
+        senha:
+          type: string
+        filiais:
+          type: array
+          items:
+            type: integer
+            format: int32
+    ProdutoDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        id_processo_venda_produto:
+          type: integer
+          format: int32
+        id_processo_venda:
+          type: integer
+          format: int32
+        nome:
+          type: string
+        quantidade:
+          type: integer
+          format: int32
+    PedidoDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        dataPedido:
+          type: string
+          format: date-time
+        status:
+          type: string
+        documento_cliente:
+          type: string
+        nome_cliente:
+          type: string
+        id_processo_venda:
+          type: integer
+          format: int32
+        itens_id:
+          type: array
+          items:
+            type: integer
+            format: int32
+    FilialDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        nome:
+          type: string
+    EntregaDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        dataEntrega:
+          type: string
+          format: date-time
+        id_pedido:
+          type: integer
+          format: int32
+        documento:
+          type: string
+          format: binary
+    EntregaResponseDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        dataEntrega:
+          type: string
+          format: date-time
+        documento:
+          type: array
+          items:
+            type: string
+            format: byte
+        pedido_id:
+          type: integer
+          format: int32
+        entregador_id:
+          type: integer
+          format: int32
+    LoginDTO:
+      type: object
+      properties:
+        email:
+          type: string
+        senha:
+          type: string
+    UsuarioLoginResponseDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        name:
+          type: string
+        email:
+          type: string
+        filiais:
+          type: array
+          items:
+            type: integer
+            format: int32
+        token:
+          type: string
