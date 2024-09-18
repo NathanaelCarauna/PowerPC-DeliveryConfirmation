@@ -2,7 +2,10 @@ import React, { createContext, useContext, useReducer, ReactNode } from 'react';
 import { Platform } from 'react-native';
 import * as Print from 'expo-print';
 import * as FileSystem from 'expo-file-system';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
+
+export const API_BASE_URL = 'http://localocalhost:8080/api/'
 
 // Tipos
 export type RetornoFilialDto = {
@@ -11,6 +14,7 @@ export type RetornoFilialDto = {
 };
 
 export type User = {
+  id: number;
   username: string;
   authenticated: boolean;
   email: string;
@@ -144,20 +148,33 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const login = async (username: string, password: string) => {
     console.log("AppContext - Iniciando processo de login para o usuário:", username);
     try {
-      // Aqui você faria a chamada à API para autenticar o usuário
-      // Este é um exemplo simulado
-      const response = await simulateApiCall(username, password);
+      //Chamada à API para autenticar o usuário
+      const response = await fetch(API_BASE_URL+'authentication/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: username,
+          senha: password,
+        }),
+      });
 
-      if (response.success) {
+      //const response = await simulateApiCall(username, password);
+
+      if (response.ok) {
+        const data = await response.json();
         console.log("AppContext - Login bem-sucedido. Atualizando estado do usuário.");
+        await AsyncStorage.setItem('userToken', data.token);
         dispatch({
           type: 'SET_USER',
           payload: {
-            username: response.username,
+            id: data.id,
+            username: data.name,
             authenticated: true,
-            email: response.email,
-            token: response.token,
-            filiais: response.filiais,
+            email: data.email,
+            token: data.token,
+            filiais: data.filiais,
           },
         });
       } else {
@@ -174,14 +191,37 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const fetchPedido = async (idPedido: number) => {
     console.log("AppContext - Iniciando busca do pedido:", idPedido);
     try {
-      // Aqui você faria a chamada à API para buscar o pedido
-      // Este é um exemplo simulado
-      const pedido = await simulateFetchPedido(idPedido);
-
-      console.log("AppContext - Pedido encontrado:", pedido);
+      //Chamada à API para buscar o pedido
+      const token = await AsyncStorage.getItem('userToken');
+      const response = await fetch(API_BASE_URL+'pedido/pedido' + idPedido, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        },
+      });
+      const data = await response.json();
+      console.log("AppContext - Pedido encontrado:", idPedido);
+      const pedido: Pedido = {
+        ID_PEDIDO: data.id,
+        NM_CLIENTE: data.nome_cliente,
+        DT_PEDIDO: data.dataPedido, //new Date().toISOString(), // verificar isso
+        ID_PROCESSO_VENDA: data.id_processo_venda,
+        DOC_CLIENTE: data.documento_cliente,
+        Itens: [
+          {
+            ID_ITEM_PROCESSO_VENDA_PRODUTO: data.itens.id_processo_venda_produto,
+            ID_PROCESSO_VENDA: data.itens.id_processo_venda,
+            ID_PRODUTO: data.itens.id,
+            NM_PRODUTO: data.itens.nome,
+            QN_PRODUTO: data.itens.quantidade,
+          }
+        ],
+      };
+    
       dispatch({
         type: 'ADD_PEDIDO',
-        payload: pedido,
+        payload: pedido
       });
     } catch (error) {
       console.error('AppContext - Erro ao buscar pedido:', error);
