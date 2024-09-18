@@ -9,7 +9,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedInputText } from "@/components/ThemedTextInput";
 import { ThemedView } from "@/components/ThemedView";
 import { useRouter } from "expo-router";
-import { useAppContext } from './context/appContext';
+import { useAppContext } from '../context/appContext';
 
 export default function Home() {
   const router = useRouter();  

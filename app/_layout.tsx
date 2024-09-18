@@ -33,7 +33,7 @@ export default function RootLayout() {
         <Stack>
           <Stack.Screen name="index" options={{ headerShown: false }} />
           <Stack.Screen name="filialSelection" options={{ headerShown: false }} />
-          <Stack.Screen name="home" options={{ headerShown: false }} />
+          <Stack.Screen name="(drawer)" options={{ headerShown: false }} />
           <Stack.Screen name="deliveryEvidencies" options={{ headerShown: false }} />
           <Stack.Screen name="documentPreview" options={{ headerShown: false }} />
           <Stack.Screen name="signatureScreen" options={{ headerShown: false }} />
