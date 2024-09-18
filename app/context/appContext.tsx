@@ -33,6 +33,14 @@ export type Pedido = {
   }>;
 };
 
+export type PedidoEntregue = {
+  ID_PEDIDO: number; // BYTE[]
+  Documento: string; // ID_PEDIDO
+  STATUS: string;
+  DT_PEDIDO: string;
+  DT_ENTREGA: string;
+};
+
 type FotoTipo = 'produto' | 'documento' | 'canhoto';
 
 type Fotos = {
@@ -44,6 +52,7 @@ type Fotos = {
 type AppState = {
   user: User | null;
   pedidos: Pedido[];
+  pedidosEntregues: PedidoEntregue[];
   assinaturas: Record<number, string>;
   fotos: Record<number, Fotos>;
   selectedFilial: RetornoFilialDto | null;
@@ -66,7 +75,8 @@ const AppContext = createContext<{
   login: (username: string, password: string) => Promise<void>;
   fetchPedido: (idPedido: number) => Promise<void>;
   removePedido: (idPedido: number) => void;
-  getPedidos: () => Pedido[]; // Nova função
+  getPedidos: () => Pedido[];
+  getPedidosEntregues: () => PedidoEntregue[];
   addFoto: (pedidoId: number, tipo: FotoTipo, foto: string) => void;
   addAssinatura: (assinatura: string) => void;
   generatePDF: (pedidoId: number) => Promise<string>;
@@ -129,12 +139,31 @@ function appReducer(state: AppState, action: Action): AppState {
   }
 }
 
+// Mock de pedidos entregues
+const mockPedidosEntregues: PedidoEntregue[] = [
+  {
+    ID_PEDIDO: 123, // Exemplo de BYTE[]
+    Documento: 'ID_PEDIDO_1',
+    STATUS: 'Entregue',
+    DT_PEDIDO: '2023-10-01',
+    DT_ENTREGA: '2023-10-02',
+  },
+  {
+    ID_PEDIDO: 342, // Exemplo de BYTE[]
+    Documento: 'ID_PEDIDO_2',
+    STATUS: 'Pendente',
+    DT_PEDIDO: '2023-10-03',
+    DT_ENTREGA: '2023-10-04',
+  },
+];
+
 // Crie o provedor do contexto
 export function AppProvider({ children }: { children: ReactNode }) {
   console.log("AppContext - Inicializando AppProvider");
   const [state, dispatch] = useReducer(appReducer, {
     user: null,
     pedidos: [],
+    pedidosEntregues: mockPedidosEntregues, // Usando a lista mockada
     assinaturas: {},
     fotos: {},
     selectedFilial: null,
@@ -202,6 +231,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const getPedidos = () => {
     console.log("AppContext - Recuperando pedidos");
     return state.pedidos;
+  };
+
+  // Função para recuperar os pedidos entregues
+  const getPedidosEntregues = () => {
+    console.log("AppContext - Recuperando pedidos entregues");
+    return state.pedidosEntregues;
   };
 
   const addFoto = (pedidoId: number, tipo: FotoTipo, foto: string) => {
@@ -354,7 +389,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   console.log("AppContext - Estado atual:", state);
 
   return (
-    <AppContext.Provider value={{ state, dispatch, login, fetchPedido, removePedido, getPedidos, addFoto, addAssinatura, generatePDF }}>
+    <AppContext.Provider value={{ state, dispatch, login, fetchPedido, removePedido, getPedidos, addFoto, addAssinatura, generatePDF, getPedidosEntregues }}>
       {children}
     </AppContext.Provider>
   );

@@ -1,9 +1,9 @@
-import { Pedido } from '@/app/context/appContext';
+import { Pedido, PedidoEntregue } from '@/app/context/appContext';
 import React from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 
 type ThemedTableProps = {
-  data: Pedido[];  
+  data: PedidoEntregue[];  
 };
 
 export function ThemedTableDeliveries({ data }: ThemedTableProps) {
@@ -30,8 +30,8 @@ export function ThemedTableDeliveries({ data }: ThemedTableProps) {
               <Text style={styles.cell}>{new Date().toLocaleDateString()}</Text>
             </View>
             <View style={styles.statusColumn}>
-              <View style={[styles.statusBadge, item.ID_PEDIDO === 12 ? styles.statusDelivered : styles.statusPending]}>
-                <Text style={styles.cell}>Status</Text>
+              <View style={[styles.statusBadge, item.STATUS === "Entregue" ? styles.statusDelivered : styles.statusPending]}>
+                <Text style={styles.cell}>{item.STATUS}</Text>
               </View>
             </View>
           </View>

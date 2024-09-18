@@ -9,22 +9,27 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedInputText } from "@/components/ThemedTextInput";
 import { ThemedView } from "@/components/ThemedView";
 import { useRouter } from "expo-router";
-import { useAppContext } from '../context/appContext';
+import { PedidoEntregue, useAppContext } from '../context/appContext';
 import { ThemedTableDeliveries } from '@/components/ThemedTableDeliveries';
 
 export default function Deliveries() {
   const router = useRouter();  
-  const { state, fetchPedido, removePedido } = useAppContext();
+  const { state, fetchPedido, removePedido, getPedidosEntregues } = useAppContext();
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [scanning, setScanning] = useState(false);  
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [pedidosEntregues, setPedidosEntregues] = useState<PedidoEntregue[]>([]); // Especificando o tipo
 
   useEffect(() => {
     (async () => {
       const { status } = await Camera.requestCameraPermissionsAsync();
       setHasPermission(status === 'granted');
     })();
+    
+    // Chama o método para obter pedidos entregues
+    const pedidos = getPedidosEntregues();
+    setPedidosEntregues(pedidos);
   }, []);
 
   const handleSearch = async (searchQuery: string) => {
@@ -85,9 +90,8 @@ export default function Deliveries() {
         )}
       </ThemedView>
 
-      <ThemedView style={styles.content}>
-        <ThemedTableDeliveries data={state.pedidos} />
-        {/* Removido: botão de entrega */}
+      <ThemedView style={styles.content}>                
+        <ThemedTableDeliveries data={pedidosEntregues} />         
       </ThemedView>
     </ThemedView>
   );
