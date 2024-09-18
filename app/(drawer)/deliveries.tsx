@@ -10,6 +10,7 @@ import { ThemedInputText } from "@/components/ThemedTextInput";
 import { ThemedView } from "@/components/ThemedView";
 import { useRouter } from "expo-router";
 import { useAppContext } from '../context/appContext';
+import { ThemedTableDeliveries } from '@/components/ThemedTableDeliveries';
 
 export default function Deliveries() {
   const router = useRouter();  
@@ -59,84 +60,15 @@ export default function Deliveries() {
     }
   };
 
-  const handleDelivery = (event: GestureResponderEvent): void => {
-    console.log("Home - Botão de entrega pressionado");
-    router.push('/deliveryEvidencies');
-  };
-
-  const handleBarcodeScan = () => {
-    if (hasPermission) {
-      console.log("Home - Iniciando escaneamento de código de barras");
-      setScanning(true);
-    } else {
-      console.log("Home - Permissão de câmera não concedida");
-      Alert.alert("Erro", "É necessária permissão para a câmera para escanear códigos de barras");
-    }
-  };
-
-  const handleBarCodeScanned = ({ type, data }: { type: string, data: string }) => {
-    console.log("Home - Código de barras detectado:", data);
-    setScanning(false);    
-    handleSearch(data);
-  };
-
-  const handleRemoveItem = (id: number) => {
-    console.log("Home - Removendo item:", id);
-    Alert.alert(
-      "Remover Pedido",
-      "Tem certeza que deseja remover este pedido?",
-      [
-        {
-          text: "Cancelar",
-          style: "cancel"
-        },
-        { 
-          text: "OK", 
-          onPress: () => {
-            removePedido(id);
-            console.log("Home - Pedido removido:", id);
-          }
-        }
-      ]
-    );
-  };
-
-  if (scanning) {
-    return (
-      <View style={styles.cameraContainer}>
-        <CameraView
-          style={styles.camera}
-          barcodeScannerSettings={{
-            barcodeTypes: ["qr", 'code128', 'code39','code93'],
-          }}
-          onBarcodeScanned={handleBarCodeScanned}
-        >
-          <View style={styles.cameraOverlay}>
-            <Button title="Cancelar" onPress={() => setScanning(false)} />
-          </View>
-        </CameraView>
-      </View>
-    );
-  }
-
-  const hasPedidos = state.pedidos.length > 0;
-
   return (
     <ThemedView style={styles.container}>
       <LogoBackground />
-      <ThemedView style={styles.searchContainer}>
-        <MaterialCommunityIcons
-          name="barcode-scan"
-          size={20}
-          color="black"
-          onPress={handleBarcodeScan}
-          style={styles.icon}
-        />
+      <ThemedView style={styles.searchContainer}>        
         <ThemedInputText
           style={styles.input}
           value={searchQuery}
           onChangeText={setSearchQuery}
-          placeholder="Buscar pedido"
+          placeholder="Filtrar pedidos"
           onSubmitEditing={e => handleSearch(e.nativeEvent.text)}
           editable={!isLoading}
         />
@@ -154,13 +86,8 @@ export default function Deliveries() {
       </ThemedView>
 
       <ThemedView style={styles.content}>
-        <ThemedTable data={state.pedidos} onRemoveItem={handleRemoveItem} />
-        <CustomButton 
-          title="Entregar" 
-          onPress={handleDelivery}
-          disabled={!hasPedidos || isLoading}
-          style={(!hasPedidos || isLoading) ? styles.disabledButton : {}}
-        />
+        <ThemedTableDeliveries data={state.pedidos} />
+        {/* Removido: botão de entrega */}
       </ThemedView>
     </ThemedView>
   );
