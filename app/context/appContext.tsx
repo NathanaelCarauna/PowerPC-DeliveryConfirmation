@@ -5,7 +5,7 @@ import * as FileSystem from 'expo-file-system';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
-export const API_BASE_URL = 'http://localocalhost:8080/api/'
+export const API_BASE_URL = 'https://1b70-2804-954-ff76-2300-c838-3dfe-6d00-9acc.ngrok-free.app/api/'
 
 // Tipos
 export type RetornoFilialDto = {
@@ -29,7 +29,7 @@ export type Pedido = {
   ID_PROCESSO_VENDA: number;
   DOC_CLIENTE: string;
   Itens: Array<{
-    ID_ITEM_PROCESSO_VENDA_PRODUTO: number;
+    ID_PROCESSO_VENDA_PRODUTO: number;
     ID_PROCESSO_VENDA: number;
     ID_PRODUTO: number;
     NM_PRODUTO: string;
@@ -187,42 +187,46 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Função para buscar um pedido pelo ID_PEDIDO
+  // Função para buscar um pedido pelo ID_PEDIDO 
   const fetchPedido = async (idPedido: number) => {
     console.log("AppContext - Iniciando busca do pedido:", idPedido);
     try {
       //Chamada à API para buscar o pedido
       const token = await AsyncStorage.getItem('userToken');
-      const response = await fetch(API_BASE_URL+'pedido/pedido' + idPedido, {
+      const response = await fetch(API_BASE_URL+'pedido/pedidoById/' + idPedido, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ' + token
         },
       });
-      const data = await response.json();
-      console.log("AppContext - Pedido encontrado:", idPedido);
-      const pedido: Pedido = {
-        ID_PEDIDO: data.id,
-        NM_CLIENTE: data.nome_cliente,
-        DT_PEDIDO: data.dataPedido, //new Date().toISOString(), // verificar isso
-        ID_PROCESSO_VENDA: data.id_processo_venda,
-        DOC_CLIENTE: data.documento_cliente,
-        Itens: [
-          {
-            ID_ITEM_PROCESSO_VENDA_PRODUTO: data.itens.id_processo_venda_produto,
-            ID_PROCESSO_VENDA: data.itens.id_processo_venda,
-            ID_PRODUTO: data.itens.id,
-            NM_PRODUTO: data.itens.nome,
-            QN_PRODUTO: data.itens.quantidade,
-          }
-        ],
-      };
-    
-      dispatch({
-        type: 'ADD_PEDIDO',
-        payload: pedido
-      });
+      if(response.ok){
+        const data = await response.json();
+        console.log("AppContext - Pedido encontrado:", idPedido);
+        const pedido: Pedido = {
+          ID_PEDIDO: data.id,
+          NM_CLIENTE: data.nome_cliente,
+          DT_PEDIDO: data.dataPedido, //new Date().toISOString(), // verificar isso
+          ID_PROCESSO_VENDA: data.id_processo_venda,
+          DOC_CLIENTE: data.documento_cliente,
+          Itens: [
+            {
+              ID_PROCESSO_VENDA_PRODUTO: data.itens.id_processo_venda_produto,
+              ID_PROCESSO_VENDA: data.itens.id_processo_venda,
+              ID_PRODUTO: data.itens.id,
+              NM_PRODUTO: data.itens.nome,
+              QN_PRODUTO: data.itens.quantidade,
+            }
+          ],
+        };
+      
+        dispatch({
+          type: 'ADD_PEDIDO',
+          payload: pedido
+        });
+      }else if(response.status == 404){
+        throw new Error('Pedido não encontrado');
+      }
     } catch (error) {
       console.error('AppContext - Erro ao buscar pedido:', error);
       // Aqui você pode disparar uma ação para mostrar uma mensagem de erro
@@ -447,7 +451,7 @@ async function simulateFetchPedido(idPedido: number): Promise<Pedido> {
     DOC_CLIENTE: `DOC${idPedido}`,
     Itens: [
       {
-        ID_ITEM_PROCESSO_VENDA_PRODUTO: idPedido * 1000,
+        ID_PROCESSO_VENDA_PRODUTO: idPedido * 1000,
         ID_PROCESSO_VENDA: idPedido * 100,
         ID_PRODUTO: idPedido * 10,
         NM_PRODUTO: `Produto ${idPedido}`,
