@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { CustomButton } from "@/components/CustomButtom";
 import LogoBackground from "@/components/LogoBackground";
 import { ThemedText } from "@/components/ThemedText";
@@ -26,12 +26,7 @@ export default function Index() {
     setIsLoading(true);
     try {
       await login(username, password);
-      if (state.user && state.user.authenticated) {
-        console.log("Login bem-sucedido");
-        router.push('/filialSelection');
-      } else {
-        Alert.alert("", "Falha na autenticação. Verifique suas credenciais.");
-      }
+      // Aguardamos a atualização do estado via useEffect
     } catch (error) {
       console.error("Erro no login:", error);
       Alert.alert("", "Ocorreu um erro durante o login. Tente novamente.");
@@ -39,6 +34,14 @@ export default function Index() {
       setIsLoading(false);
     }
   }
+
+  useEffect(() => {
+    // Monitora a mudança no estado do usuário
+    if (state.user && state.user.authenticated) {
+      console.log("Login bem-sucedido");
+      router.push('/filialSelection');
+    }
+  }, [state.user]);
 
   return (
     <ThemedView
