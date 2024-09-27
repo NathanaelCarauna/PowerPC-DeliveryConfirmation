@@ -12,10 +12,10 @@ import { useRouter } from "expo-router";
 import { useAppContext } from '../context/appContext';
 
 export default function Home() {
-  const router = useRouter();  
+  const router = useRouter();
   const { state, fetchPedido, removePedido } = useAppContext();
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
-  const [scanning, setScanning] = useState(false);  
+  const [scanning, setScanning] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -29,6 +29,7 @@ export default function Home() {
   const handleSearch = async (searchQuery: string) => {
     console.log("Home - Iniciando busca de pedido:", searchQuery);
     const pedidoId = parseInt(searchQuery, 10);
+
     if (isNaN(pedidoId)) {
       console.log("Home - ID de pedido inválido");
       Alert.alert("Erro", "Por favor, insira um ID de pedido válido.");
@@ -51,9 +52,15 @@ export default function Home() {
       console.log("Home - Pedido buscado com sucesso");
       setSearchQuery('');
       Keyboard.dismiss();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Home - Erro ao buscar pedido:", error);
-      Alert.alert("Erro", "Não foi possível buscar o pedido. Tente novamente.");
+
+      // Se o erro for de 'Pedido não encontrado', exibe um alerta específico
+      if (error.message === 'Pedido não encontrado') {
+        Alert.alert("Aviso", "Pedido não encontrado. Verifique o ID e tente novamente.");
+      } else {
+        Alert.alert("Erro", "Não foi possível buscar o pedido. Tente novamente.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -76,7 +83,7 @@ export default function Home() {
 
   const handleBarCodeScanned = ({ type, data }: { type: string, data: string }) => {
     console.log("Home - Código de barras detectado:", data);
-    setScanning(false);    
+    setScanning(false);
     handleSearch(data);
   };
 
@@ -90,8 +97,8 @@ export default function Home() {
           text: "Cancelar",
           style: "cancel"
         },
-        { 
-          text: "OK", 
+        {
+          text: "OK",
           onPress: () => {
             removePedido(id);
             console.log("Home - Pedido removido:", id);
@@ -107,7 +114,7 @@ export default function Home() {
         <CameraView
           style={styles.camera}
           barcodeScannerSettings={{
-            barcodeTypes: ["qr", 'code128', 'code39','code93'],
+            barcodeTypes: ["qr", 'code128', 'code39', 'code93'],
           }}
           onBarcodeScanned={handleBarCodeScanned}
         >
@@ -155,8 +162,8 @@ export default function Home() {
 
       <ThemedView style={styles.content}>
         <ThemedTable data={state.pedidos} onRemoveItem={handleRemoveItem} />
-        <CustomButton 
-          title="Entregar" 
+        <CustomButton
+          title="Entregar"
           onPress={handleDelivery}
           disabled={!hasPedidos || isLoading}
           style={(!hasPedidos || isLoading) ? styles.disabledButton : {}}

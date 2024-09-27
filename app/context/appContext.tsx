@@ -203,20 +203,32 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const fetchPedido = async (idPedido: number) => {
     console.log("AppContext - Iniciando busca do pedido:", idPedido);
     try {
-      // Aqui você faria a chamada à API para buscar o pedido
-      // Este é um exemplo simulado
-      const pedido = await simulateFetchPedido(idPedido);
+      // Simulando a chamada à API para buscar o pedido
+      const response = await simulateFetchPedido(idPedido);
 
+      if (response.status === 404) {
+        console.log("AppContext - Pedido não encontrado:", idPedido);
+        throw new Error('Pedido não encontrado');
+      }
+
+      const pedido = await response.json(); // Se for um response real, é necessário fazer o parsing
       console.log("AppContext - Pedido encontrado:", pedido);
+
       dispatch({
         type: 'ADD_PEDIDO',
         payload: pedido,
       });
-    } catch (error) {
+    } catch (error:any) {
       console.error('AppContext - Erro ao buscar pedido:', error);
-      // Aqui você pode disparar uma ação para mostrar uma mensagem de erro
+
+      if (error.message === 'Pedido não encontrado') {
+        throw new Error('Pedido não encontrado');  // Propaga erro para o handleSearch
+      } else {
+        throw new Error('Erro ao buscar pedido');
+      }
     }
   };
+
 
   // Função para remover um pedido
   const removePedido = (idPedido: number) => {
@@ -427,14 +439,19 @@ async function simulateApiCall(username: string, password: string) {
   return response;
 }
 
-// Função auxiliar para simular uma chamada de API para buscar um pedido
-async function simulateFetchPedido(idPedido: number): Promise<Pedido> {
+async function simulateFetchPedido(idPedido: number): Promise<Response> {
   console.log("AppContext - Simulando chamada de API para buscar pedido:", idPedido);
-  // Simula uma chamada de API com um atraso de 1 segundo
+
+  // Simula um atraso para representar o tempo de resposta da API
   await new Promise(resolve => setTimeout(resolve, 1000));
 
-  // Simula uma resposta bem-sucedida
-  const pedido: Pedido = {
+  // Condição para simular um pedido não encontrado (404)
+  if (idPedido < 1) {
+    return new Response(null, { status: 404, statusText: 'Not Found' });
+  }
+
+  // Simula uma resposta bem-sucedida (200 OK)
+  const pedido = {
     ID_PEDIDO: idPedido,
     NM_CLIENTE: `Cliente ${idPedido}`,
     DT_PEDIDO: new Date().toISOString(),
@@ -450,8 +467,13 @@ async function simulateFetchPedido(idPedido: number): Promise<Pedido> {
       }
     ],
   };
-  console.log("AppContext - Resposta simulada da API para busca de pedido:", pedido);
-  return pedido;
+
+  // Simulando um objeto Response que retornaria de uma chamada fetch real
+  const responseBody = JSON.stringify(pedido);
+  return new Response(responseBody, {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' }
+  });
 }
 
 // Função auxiliar para simular a geração de PDF
