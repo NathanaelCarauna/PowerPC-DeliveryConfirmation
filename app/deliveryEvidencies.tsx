@@ -1,4 +1,5 @@
-import { TouchableOpacity, Alert, ScrollView, StyleSheet, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { TouchableOpacity, Alert, ScrollView, StyleSheet, View, ActivityIndicator } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { CustomButton } from "@/components/CustomButtom";
 import LogoBackground from "@/components/LogoBackground";
@@ -11,7 +12,18 @@ import { useAppContext } from './context/appContext';
 export default function DeliveryEvidencies() {
   const router = useRouter();
   const { state, addFoto } = useAppContext();
-  const pedidos = state.pedidos;
+  const [isLoading, setIsLoading] = useState(true);
+  const [pedidos, setPedidos] = useState(state.pedidos);
+
+  useEffect(() => {
+    console.log("DeliveryEvidencies - Initial state.pedidos:", state.pedidos);
+    setPedidos(state.pedidos);
+    setIsLoading(false);
+  }, [state.pedidos]);
+
+  useEffect(() => {
+    console.log("DeliveryEvidencies - Pedidos atualizados:", pedidos);
+  }, [pedidos]);
 
   async function openCamera(tipo: 'documento' | 'canhoto' | 'produto') {
     let result = await ImagePicker.launchCameraAsync({
@@ -22,7 +34,6 @@ export default function DeliveryEvidencies() {
     });
 
     if (!result.canceled && result.assets && result.assets.length > 0) {
-      // Aplicar a foto apenas aos pedidos que não possuem foto deste tipo
       pedidos.forEach(pedido => {
         const pedidoFotos = state.fotos[pedido.ID_PEDIDO];
         if (!pedidoFotos || !pedidoFotos[tipo]) {
@@ -57,6 +68,17 @@ export default function DeliveryEvidencies() {
     });
   };
 
+  if (isLoading) {
+    return (
+      <ThemedView style={[styles.container, styles.centerContent]}>
+        <ActivityIndicator size="large" color="#0f3a6d" />
+        <ThemedText style={styles.loadingText}>Carregando pedidos...</ThemedText>
+      </ThemedView>
+    );
+  }
+
+  console.log("DeliveryEvidencies - Rendering. Pedidos:", pedidos);
+
   return (
     <ThemedView style={styles.container}>
       <LogoBackground showLabel={false} />
@@ -64,40 +86,44 @@ export default function DeliveryEvidencies() {
 
       <ScrollView style={styles.scrollContainer}>
         <View style={styles.pedidosContainer}>
-          {pedidos.map((pedido) => (
-            <View key={pedido.ID_PEDIDO} style={styles.pedidoCard}>
-              <View style={styles.pedidoHeader}>
-                <ThemedText style={styles.clienteName}>{pedido.NM_CLIENTE}</ThemedText>
-                <View style={styles.pedidoIdContainer}>
-                  <ThemedText style={styles.pedidoId}>Pedido #{pedido.ID_PEDIDO}</ThemedText>
-                  {hasAllPhotos(pedido.ID_PEDIDO) && (
-                    <MaterialIcons name="check-circle" size={20} color="green" style={styles.checkIcon} />
-                  )}
-                </View>
-              </View>
-              <View style={styles.pedidoInfo}>
-                <View style={styles.infoRow}>
-                  <Ionicons name="calendar-outline" size={16} color="#666" />
-                  <ThemedText style={styles.infoText}>{new Date(pedido.DT_PEDIDO).toLocaleDateString()}</ThemedText>
-                </View>
-                <View style={styles.infoRow}>
-                  <Ionicons name="document-text-outline" size={16} color="#666" />
-                  <ThemedText style={styles.infoText}>{pedido.DOC_CLIENTE}</ThemedText>
-                </View>
-              </View>
-              <View style={styles.itensList}>
-                {pedido.Itens.map((item, itemIndex) => (
-                  <View key={itemIndex} style={styles.itemRow}>
-                    <View style={styles.itemNameContainer}>
-                      <ThemedText style={styles.itemCode}>{item.ID_PRODUTO} - </ThemedText>
-                      <ThemedText style={styles.itemName}>{item.NM_PRODUTO}</ThemedText>
-                    </View>
-                    <ThemedText style={styles.itemQuantity}>{item.QN_PRODUTO}x</ThemedText>
+          {pedidos.length === 0 ? (
+            <ThemedText style={styles.noPedidosText}>Nenhum pedido disponível.</ThemedText>
+          ) : (
+            pedidos.map((pedido) => (
+              <View key={pedido.ID_PEDIDO} style={styles.pedidoCard}>
+                <View style={styles.pedidoHeader}>
+                  <ThemedText style={styles.clienteName}>{pedido.NM_CLIENTE}</ThemedText>
+                  <View style={styles.pedidoIdContainer}>
+                    <ThemedText style={styles.pedidoId}>Pedido #{pedido.ID_PEDIDO}</ThemedText>
+                    {hasAllPhotos(pedido.ID_PEDIDO) && (
+                      <MaterialIcons name="check-circle" size={20} color="green" style={styles.checkIcon} />
+                    )}
                   </View>
-                ))}
+                </View>
+                <View style={styles.pedidoInfo}>
+                  <View style={styles.infoRow}>
+                    <Ionicons name="calendar-outline" size={16} color="#666" />
+                    <ThemedText style={styles.infoText}>{new Date(pedido.DT_PEDIDO).toLocaleDateString()}</ThemedText>
+                  </View>
+                  <View style={styles.infoRow}>
+                    <Ionicons name="document-text-outline" size={16} color="#666" />
+                    <ThemedText style={styles.infoText}>{pedido.DOC_CLIENTE}</ThemedText>
+                  </View>
+                </View>
+                <View style={styles.itensList}>
+                  {pedido.Itens.map((item, itemIndex) => (
+                    <View key={itemIndex} style={styles.itemRow}>
+                      <View style={styles.itemNameContainer}>
+                        <ThemedText style={styles.itemCode}>{item.ID_PRODUTO} - </ThemedText>
+                        <ThemedText style={styles.itemName}>{item.NM_PRODUTO}</ThemedText>
+                      </View>
+                      <ThemedText style={styles.itemQuantity}>{item.QN_PRODUTO}x</ThemedText>
+                    </View>
+                  ))}
+                </View>
               </View>
-            </View>
-          ))}
+            ))
+          )}
         </View>
       </ScrollView>
 
@@ -134,6 +160,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
     padding: 15,
   },
+  centerContent: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+  },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
@@ -145,6 +179,11 @@ const styles = StyleSheet.create({
   },
   pedidosContainer: {
     paddingBottom: 20,
+  },
+  noPedidosText: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginTop: 20,
   },
   pedidoCard: {
     backgroundColor: '#ffffff',

@@ -20,7 +20,7 @@ import {
 } from '@react-navigation/drawer'; // Importar DrawerItem e DrawerContentScrollView
 import { Linking } from 'react-native'; // Importar Linking para abrir URLs
 
-function CustomDrawerContent(props : any) {
+function CustomDrawerContent(props: any) {
   return (
     <DrawerContentScrollView {...props}>
       <DrawerItemList {...props} />
@@ -52,18 +52,16 @@ export default function RootLayout() {
   }
 
   return (
-    <AppProvider>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <GestureHandlerRootView style={{ flex: 1 }}> 
-          <Drawer
-            drawerContent={(props) => <CustomDrawerContent {...props} />} 
-          >
-            <Drawer.Screen name="home" options={{ headerShown: false, drawerLabel: 'Realizar entrega', title: 'overview' }} />            
-            <Drawer.Screen name="deliveries" options={{ headerShown: false, drawerLabel: 'Minhas entregas', title: 'overview' }} />            
-            {/* <Drawer.Screen name="changeFilial" options={{ headerShown: false, drawerLabel: 'Trocar filial', title: 'overview' }} />             */}
-          </Drawer>
-        </GestureHandlerRootView>
-      </ThemeProvider>
-    </AppProvider>
+    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <Drawer
+          drawerContent={(props) => <CustomDrawerContent {...props} />}
+        >
+          <Drawer.Screen name="home" options={{ headerShown: false, drawerLabel: 'Realizar entrega', title: 'overview' }} />
+          <Drawer.Screen name="deliveries" options={{ headerShown: false, drawerLabel: 'Minhas entregas', title: 'overview' }} />
+          {/* <Drawer.Screen name="changeFilial" options={{ headerShown: false, drawerLabel: 'Trocar filial', title: 'overview' }} />             */}
+        </Drawer>
+      </GestureHandlerRootView>
+    </ThemeProvider>
   );
 }
