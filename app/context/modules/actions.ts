@@ -1,6 +1,6 @@
 import { Dispatch } from 'react';
-import { Action, User, Pedido, FotoTipo, RetornoFilialDto } from './types';
-import { simulateApiCall, simulateFetchPedido } from './utils';
+import { Action, User, Pedido, FotoTipo, RetornoFilialDto, PedidoEntregue, AppState } from './types';
+import { simulateApiCall, simulateFetchPedido, simulateSendPedidoEntregue } from './utils';
 import * as Print from 'expo-print';
 import * as FileSystem from 'expo-file-system';
 
@@ -14,6 +14,7 @@ export const login = (dispatch: Dispatch<Action>) => async (username: string, pa
             dispatch({
                 type: 'SET_USER',
                 payload: {
+                    id: response.id,
                     username: response.username,
                     authenticated: true,
                     email: response.email,
@@ -218,4 +219,44 @@ export const setSelectedFilial = (dispatch: Dispatch<Action>) => (filial: Retorn
         type: 'SET_SELECTED_FILIAL',
         payload: filial,
     });
+};
+
+export const sendPedidoEntregue = (dispatch: Dispatch<Action>) => async (pedidoEntregue: PedidoEntregue) => {
+    console.log("AppContext - Enviando pedido entregue para o servidor:", pedidoEntregue.ID_PEDIDO);
+    try {
+        const response = await simulateSendPedidoEntregue(pedidoEntregue);
+        
+        if (!response.ok) {
+            throw new Error('Erro ao enviar pedido entregue');
+        }
+
+        const responseData = await response.json();
+
+        if (responseData.success) {
+            dispatch({
+                type: 'SEND_PEDIDO_ENTREGUE',
+                payload: { ...pedidoEntregue, STATUS: 'ENTREGUE' },
+            });
+            console.log("AppContext - Pedido entregue enviado com sucesso");
+        } else {
+            throw new Error('Falha ao processar pedido entregue no servidor');
+        }
+    } catch (error) {
+        console.error("AppContext - Erro ao enviar pedido entregue:", error);
+        dispatch({
+            type: 'UPDATE_PEDIDO_ENTREGUE',
+            payload: { 
+                ...pedidoEntregue, 
+                STATUS: 'PENDENTE', 
+                tentativas: (pedidoEntregue.tentativas || 0) + 1 
+            },
+        });
+    }
+};
+
+export const retryPendingPedidos = (dispatch: Dispatch<Action>, getState: () => AppState) => async () => {
+    const pendingPedidos = getState().pedidosEntregues.filter(p => p.STATUS === 'PENDENTE');
+    for (const pedido of pendingPedidos) {
+        await sendPedidoEntregue(dispatch)(pedido);
+    }
 };

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
 import { AppState, AppContextType, Pedido, PedidoEntregue } from './types';
 import { appReducer } from './reducer';
-import { login, fetchPedido, removePedido, addFoto, addAssinatura, generatePDF, setSelectedFilial } from './actions';
+import { login, fetchPedido, removePedido, addFoto, addAssinatura, generatePDF, setSelectedFilial, sendPedidoEntregue, retryPendingPedidos } from './actions';
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
@@ -19,6 +19,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
 
   const contextValue: AppContextType = {
+    retryPendingPedidos: retryPendingPedidos(dispatch, () => state),
     state,
     dispatch,
     login: login(dispatch),
@@ -30,6 +31,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     addAssinatura: addAssinatura(dispatch),
     generatePDF: generatePDF(state),
     setSelectedFilial: setSelectedFilial(dispatch),
+    sendPedidoEntregue: sendPedidoEntregue(dispatch),
   };
 
   return (

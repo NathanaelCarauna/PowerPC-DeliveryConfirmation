@@ -49,6 +49,14 @@ export function appReducer(state: AppState, action: Action): AppState {
     case 'GENERATE_PDF':
       console.log("AppContext - Reducer - Gerando PDF para o pedido:", action.payload);
       return state;
+    case 'SEND_PEDIDO_ENTREGUE':
+    case 'UPDATE_PEDIDO_ENTREGUE':
+      const updatedPedidosEntregues = state.pedidosEntregues.filter(p => p.ID_PEDIDO !== action.payload.ID_PEDIDO);
+      return {
+        ...state,
+        pedidosEntregues: [...updatedPedidosEntregues, action.payload],
+        pedidos: state.pedidos.filter(pedido => pedido.ID_PEDIDO !== action.payload.ID_PEDIDO)
+      };
     default:
       console.log("AppContext - Reducer - Ação desconhecida:", action);
       return state;

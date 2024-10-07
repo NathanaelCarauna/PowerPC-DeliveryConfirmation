@@ -1,36 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { GestureResponderEvent, StyleSheet, View, Keyboard, Button, Alert, ActivityIndicator } from 'react-native';
-import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
-import { Camera, CameraType, CameraView } from 'expo-camera';
+import { StyleSheet, View, Alert, ActivityIndicator, Keyboard } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 import { CustomButton } from "@/components/CustomButtom";
 import LogoBackground from "@/components/LogoBackground";
-import { ThemedTable } from "@/components/ThemedTable";
-import { ThemedText } from "@/components/ThemedText";
 import { ThemedInputText } from "@/components/ThemedTextInput";
 import { ThemedView } from "@/components/ThemedView";
 import { useRouter } from "expo-router";
-import { PedidoEntregue, useAppContext } from '../context/appContext';
+import { useAppContext } from '../context/appContext';
 import { ThemedTableDeliveries } from '@/components/ThemedTableDeliveries';
+import { PedidoEntregue } from '../context/modules/types';
 
 export default function Deliveries() {
   const router = useRouter();  
-  const { state, fetchPedido, removePedido, getPedidosEntregues } = useAppContext();
-  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
-  const [scanning, setScanning] = useState(false);  
+  const { state, fetchPedido, removePedido, getPedidosEntregues, retryPendingPedidos } = useAppContext();
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [pedidosEntregues, setPedidosEntregues] = useState<PedidoEntregue[]>([]); // Especificando o tipo
+  const [pedidosEntregues, setPedidosEntregues] = useState<PedidoEntregue[]>([]); 
 
   useEffect(() => {
-    (async () => {
-      const { status } = await Camera.requestCameraPermissionsAsync();
-      setHasPermission(status === 'granted');
-    })();
-    
-    // Chama o método para obter pedidos entregues
     const pedidos = getPedidosEntregues();
     setPedidosEntregues(pedidos);
-  }, []);
+  }, [state.pedidosEntregues]);
 
   const handleSearch = async (searchQuery: string) => {
     console.log("Home - Iniciando busca de pedido:", searchQuery);
@@ -65,6 +55,19 @@ export default function Deliveries() {
     }
   };
 
+  const handleRetryPendingPedidos = async () => {
+    setIsLoading(true);
+    try {
+      await retryPendingPedidos();
+      Alert.alert('Sucesso', 'Tentativa de reenvio dos pedidos pendentes iniciada.');
+    } catch (error) {
+      console.error("Erro ao reenviar pedidos pendentes:", error);
+      Alert.alert('Erro', 'Ocorreu um erro ao tentar reenviar os pedidos pendentes.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <ThemedView style={styles.container}>
       <LogoBackground />
@@ -93,6 +96,13 @@ export default function Deliveries() {
       <ThemedView style={styles.content}>                
         <ThemedTableDeliveries data={pedidosEntregues} />         
       </ThemedView>
+
+      <CustomButton 
+        title="Reenviar Pedidos Pendentes"
+        onPress={handleRetryPendingPedidos}
+        disabled={isLoading}
+        style={styles.retryButton}
+      />
     </ThemedView>
   );
 }
@@ -103,20 +113,6 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "center",
     padding: 15,
-  },
-  cameraContainer: {
-    flex: 1,
-    width: '100%',
-  },
-  camera: {
-    flex: 1,
-  },
-  cameraOverlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    backgroundColor: 'transparent',
-    paddingBottom: 20,
   },
   searchContainer: {
     marginTop: '40%',
@@ -141,9 +137,6 @@ const styles = StyleSheet.create({
   searchIcon: {
     marginLeft: 5,
   },
-  icon: {
-    marginRight: 5,
-  },
   content: {
     flex: 1,
     width: '100%',
@@ -151,14 +144,8 @@ const styles = StyleSheet.create({
     alignItems: 'stretch',
     backgroundColor: 'transparent',
   },
-  disabledButton: {
-    opacity: 0.5,
-  },
-  loadingOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1000,
+  retryButton: {
+    marginTop: 10,
+    width: '80%',
   },
 });

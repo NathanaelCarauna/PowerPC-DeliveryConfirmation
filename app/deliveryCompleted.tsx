@@ -8,7 +8,8 @@ import { useAppContext } from './context/appContext';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import * as IntentLauncher from 'expo-intent-launcher';
-import * as ScreenOrientation from 'expo-screen-orientation'; // Importa a biblioteca
+import * as ScreenOrientation from 'expo-screen-orientation';
+import { PedidoEntregue } from './context/modules/types';
 
 type PDFItem = {
   pedidoId: number;
@@ -17,13 +18,13 @@ type PDFItem = {
 
 export default function DeliveryCompleted() {
   const router = useRouter();
-  const { state, generatePDF } = useAppContext();
+  const { state, generatePDF, sendPedidoEntregue } = useAppContext();
   const [isGeneratingPDFs, setIsGeneratingPDFs] = useState(false);
   const [pdfItems, setPdfItems] = useState<PDFItem[]>([]);
 
   useEffect(() => {
     const setPortrait = async () => {
-      await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT); // Define a orientação como retrato
+      await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT);
     };
     setPortrait();
     generatePDFsForAllPedidos();
@@ -67,10 +68,30 @@ export default function DeliveryCompleted() {
     }
   };
 
-  const handleFinish = () => {
-    
-    // Você pode adicionar uma ação no AppContext para limpar o estado se necessário
-    router.replace('/home');
+  const handleFinish = async () => {
+    try {
+      for (const pedido of state.pedidos) {
+        const pdfItem = pdfItems.find(item => item.pedidoId === pedido.ID_PEDIDO);
+        if (!pdfItem) {
+          throw new Error(`PDF não encontrado para o pedido ${pedido.ID_PEDIDO}`);
+        }
+        const pedidoEntregue: PedidoEntregue = {
+          ID_USUARIO: state.user?.id || 0,
+          ID_PEDIDO: pedido.ID_PEDIDO,
+          Documento: pdfItem.path,
+          STATUS: 'PENDENTE',
+          DT_PEDIDO: pedido.DT_PEDIDO,
+          DT_ENTREGA: new Date().toISOString(),
+        };
+        await sendPedidoEntregue(pedidoEntregue);
+      }
+      
+      Alert.alert('Sucesso', 'Todos os pedidos foram finalizados. Alguns podem estar pendentes de sincronização.');
+      router.replace('/home');
+    } catch (error) {
+      // console.error("Erro ao finalizar pedidos:", error);
+      Alert.alert('Erro', 'Ocorreu um erro ao finalizar os pedidos. Eles serão sincronizados posteriormente.');
+    }
   };
 
   const renderPDFItem = ({ item }: { item: PDFItem }) => (
@@ -106,6 +127,7 @@ export default function DeliveryCompleted() {
         title="Finalizar"
         onPress={handleFinish}
         style={styles.button}
+        disabled={isGeneratingPDFs}
       />
     </ThemedView>
   );
@@ -157,6 +179,6 @@ const styles = StyleSheet.create({
   button: {
     marginTop: 20,
     width: '80%',
-    alignSelf: 'center',
+    alignSelf: 'center',    
   },
 });

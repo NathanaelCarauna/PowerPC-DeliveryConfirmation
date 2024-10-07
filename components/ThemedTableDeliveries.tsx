@@ -1,4 +1,5 @@
-import { Pedido, PedidoEntregue } from '@/app/context/appContext';
+
+import { PedidoEntregue } from '@/app/context/modules/types';
 import React from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 
@@ -30,7 +31,7 @@ export function ThemedTableDeliveries({ data }: ThemedTableProps) {
               <Text style={styles.cell}>{new Date().toLocaleDateString()}</Text>
             </View>
             <View style={styles.statusColumn}>
-              <View style={[styles.statusBadge, item.STATUS === "Entregue" ? styles.statusDelivered : styles.statusPending]}>
+              <View style={[styles.statusBadge, item.STATUS === "ENTREGUE" ? styles.statusDelivered : styles.statusPending]}>
                 <Text style={styles.cell}>{item.STATUS}</Text>
               </View>
             </View>
