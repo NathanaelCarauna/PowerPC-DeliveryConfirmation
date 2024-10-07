@@ -31,9 +31,17 @@ function CustomDrawerContent(props: any) {
     router.replace('/'); // Redirecione para a tela de login (index)
   };
 
+  const handleFilialSelection = () => {
+    router.push('/filialSelection');
+  };
+
   return (
     <DrawerContentScrollView {...props}>
       <DrawerItemList {...props} />
+      <DrawerItem
+        label="Trocar Filial"
+        onPress={handleFilialSelection}
+      />
       <DrawerItem
         label="Sair"
         onPress={handleLogout} // Use a nova função handleLogout
