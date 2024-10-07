@@ -1,6 +1,15 @@
 import { AppState, Action } from './types';
 
-export function appReducer(state: AppState, action: Action): AppState {
+const initialState: AppState = {
+  user: null,
+  pedidos: [],
+  pedidosEntregues: [], 
+  assinaturas: {},
+  fotos: {},
+  selectedFilial: null,
+};
+
+export function appReducer(state: AppState, action: any): AppState {
   console.log("AppContext - Reducer - Ação recebida:", action.type);
   switch (action.type) {
     case 'SET_USER':
@@ -56,6 +65,10 @@ export function appReducer(state: AppState, action: Action): AppState {
         ...state,
         pedidosEntregues: [...updatedPedidosEntregues, action.payload],
         pedidos: state.pedidos.filter(pedido => pedido.ID_PEDIDO !== action.payload.ID_PEDIDO)
+      };
+    case 'LOGOUT':
+      return {
+        ...initialState,        
       };
     default:
       console.log("AppContext - Reducer - Ação desconhecida:", action);

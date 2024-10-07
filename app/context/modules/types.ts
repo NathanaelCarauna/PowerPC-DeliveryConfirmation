@@ -88,4 +88,5 @@ export type AppContextType = {
     setSelectedFilial: (filial: RetornoFilialDto | null) => void;
     sendPedidoEntregue: (pedidoEntregue: PedidoEntregue) => Promise<void>;
     retryPendingPedidos: () => Promise<void>;
+    logout: () => void;
 };

@@ -9,6 +9,8 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler'; // Import
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { AppProvider } from '../context/appContext';
+import { useAppContext } from '../context/appContext'; // Importe o hook useAppContext
+import { useRouter } from 'expo-router'; // Importe o hook useRouter
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -21,15 +23,20 @@ import {
 import { Linking } from 'react-native'; // Importar Linking para abrir URLs
 
 function CustomDrawerContent(props: any) {
+  const { logout } = useAppContext(); // Use o hook useAppContext para obter a função de logout
+  const router = useRouter(); // Use o hook useRouter para navegação
+
+  const handleLogout = async () => {
+    await logout(); // Chame a função de logout
+    router.replace('/'); // Redirecione para a tela de login (index)
+  };
+
   return (
     <DrawerContentScrollView {...props}>
       <DrawerItemList {...props} />
       <DrawerItem
         label="Sair"
-        onPress={() => {
-          // Lógica para logout
-          console.log('Logout realizado'); // Substitua isso pela sua lógica de logout
-        }}
+        onPress={handleLogout} // Use a nova função handleLogout
       />
     </DrawerContentScrollView>
   );

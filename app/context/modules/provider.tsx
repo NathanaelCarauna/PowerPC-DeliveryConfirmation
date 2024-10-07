@@ -2,6 +2,7 @@ import React, { createContext, useContext, useReducer, ReactNode } from 'react';
 import { AppState, AppContextType, Pedido, PedidoEntregue } from './types';
 import { appReducer } from './reducer';
 import { login, fetchPedido, removePedido, addFoto, addAssinatura, generatePDF, setSelectedFilial, sendPedidoEntregue, retryPendingPedidos } from './actions';
+import { useRouter } from 'expo-router'; // Importe o hook useRouter
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
@@ -17,8 +18,17 @@ const initialState: AppState = {
 export function AppProvider({ children }: { children: ReactNode }) {
   console.log("AppContext - Inicializando AppProvider");
   const [state, dispatch] = useReducer(appReducer, initialState);
+  const router = useRouter(); // Use o hook useRouter
+
+  const logout = () => {
+    // Limpa o estado do usuário
+    dispatch({ type: 'LOGOUT' });
+    // Redireciona para a tela de login
+    router.replace('/');
+  };
 
   const contextValue: AppContextType = {
+    logout,
     retryPendingPedidos: retryPendingPedidos(dispatch, () => state),
     state,
     dispatch,
