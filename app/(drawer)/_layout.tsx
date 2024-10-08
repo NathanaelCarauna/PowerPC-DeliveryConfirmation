@@ -32,7 +32,7 @@ function CustomDrawerContent(props: any) {
   };
 
   const handleFilialSelection = () => {
-    router.push('/filialSelection');
+    router.replace('/filialSelection');
   };
 
   return (

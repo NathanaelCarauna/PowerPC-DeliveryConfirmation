@@ -45,7 +45,8 @@ export default function SignatureScreen() {
         await new Promise(resolve => setTimeout(resolve, 2000));
         
         // Navegar para a página DeliveryCompleted
-        router.push('/deliveryCompleted');
+        router.dismiss();
+        router.replace('/deliveryCompleted');
       } catch (error) {
         console.error("Erro ao processar a assinatura:", error);
         Alert.alert('Erro', 'Ocorreu um erro ao processar a assinatura. Por favor, tente novamente.');

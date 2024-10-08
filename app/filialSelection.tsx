@@ -36,7 +36,8 @@ export default function FilialSelection() {
     if (filial) {
       console.log("FilialSelection - Filial encontrada:", filial);
       dispatch({ type: 'SET_SELECTED_FILIAL', payload: filial });
-      router.push('/home');
+      router.dismiss();
+      router.replace('/home');
     } else {
       console.log("FilialSelection - Filial não encontrada");
       Alert.alert("Erro", "Filial selecionada não encontrada.");
