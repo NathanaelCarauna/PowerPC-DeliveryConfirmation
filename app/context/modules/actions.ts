@@ -3,55 +3,98 @@ import { Action, User, Pedido, FotoTipo, RetornoFilialDto, PedidoEntregue, AppSt
 import { simulateApiCall, simulateFetchPedido, simulateSendPedidoEntregue } from './utils';
 import * as Print from 'expo-print';
 import * as FileSystem from 'expo-file-system';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+export const API_BASE_URL = 'https://b9e6-2804-954-ff12-cb00-ccbd-bf6f-798f-812.ngrok-free.app/api/'
+import {Alert} from 'react-native';
 
 export const login = (dispatch: Dispatch<Action>) => async (username: string, password: string) => {
     console.log("AppContext - Iniciando processo de login para o usuário:", username);
     try {
-        const response = await simulateApiCall(username, password);
+        //Chamada à API para autenticar o usuário
+        const response = await fetch(API_BASE_URL+'authentication/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: username,
+            senha: password,
+          }),
+        });
 
-        if (response.success) {
+        if (response.ok) {
+            const data = await response.json();
             console.log("AppContext - Login bem-sucedido. Atualizando estado do usuário.");
+            await AsyncStorage.setItem('userToken', data.token);
             dispatch({
                 type: 'SET_USER',
                 payload: {
-                    id: response.id,
-                    username: response.username,
+                    id: data.id,
+                    username: data.name,
                     authenticated: true,
-                    email: response.email,
-                    token: response.token,
-                    filiais: response.filiais,
+                    email: data.email,
+                    token: data.token,
+                    filiais: data.filiais,
                 },
             });
-        } else {
+        } else if(response.status == 404){
             console.log("AppContext - Falha na autenticação");
             throw new Error('Falha na autenticação');
+        } else{
+            console.log("AppContext - Falha de comunicação");
+            throw new Error('Falha de comunicação');
         }
-    } catch (error) {
-        console.error('AppContext - Erro no login:', error);
-        // Aqui você pode disparar uma ação para mostrar uma mensagem de erro
+    } catch (error: any) {
+        if(error.message === 'Falha na autenticação'){
+            console.error('AppContext - Erro no login:', error);
+            throw new Error('Falha na autenticação');
+        }else{
+          throw new Error('Falha de comunicação');
+        }
     }
 };
 
 export const fetchPedido = (dispatch: Dispatch<Action>) => async (idPedido: number) => {
     console.log("AppContext - Iniciando busca do pedido:", idPedido);
     try {
-        const response = await simulateFetchPedido(idPedido);
-
-        if (response.status === 404) {
-            console.log("AppContext - Pedido não encontrado:", idPedido);
-            throw new Error('Pedido não encontrado');
-        }
-
-        const pedido = await response.json();
-        console.log("AppContext - Pedido encontrado:", pedido);
-
-        dispatch({
-            type: 'ADD_PEDIDO',
-            payload: pedido,
+        //Chamada à API para buscar o pedido
+        const token = await AsyncStorage.getItem('userToken');
+        const response = await fetch(API_BASE_URL+'pedido/pedidoById/' + idPedido, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
         });
+        if(response.ok){
+          const data = await response.json();
+          console.log("AppContext - Pedido encontrado:", idPedido);
+          const pedido: Pedido = {
+            ID_PEDIDO: data.id,
+            NM_CLIENTE: data.nome_cliente,
+            DT_PEDIDO: data.dataPedido,
+            ID_PROCESSO_VENDA: data.id_processo_venda,
+            DOC_CLIENTE: data.documento_cliente,
+            Itens: [
+              {
+                ID_ITEM_PROCESSO_VENDA_PRODUTO: data.itens.id_processo_venda_produto,
+                ID_PROCESSO_VENDA: data.itens.id_processo_venda,
+                ID_PRODUTO: data.itens.id,
+                NM_PRODUTO: data.itens.nome,
+                QN_PRODUTO: data.itens.quantidade,
+              }
+            ],
+          };
+          dispatch({
+            type: 'ADD_PEDIDO',
+            payload: pedido
+          });
+        }else if(response.status == 404){
+          console.log("AppContext - Pedido não encontrado:", idPedido);
+          throw new Error('Pedido não encontrado');
+        }
     } catch (error: any) {
         console.error('AppContext - Erro ao buscar pedido:', error);
-
         if (error.message === 'Pedido não encontrado') {
             throw new Error('Pedido não encontrado');
         } else {
@@ -237,7 +280,7 @@ export const sendPedidoEntregue = (dispatch: Dispatch<Action>) => async (pedidoE
                 type: 'SEND_PEDIDO_ENTREGUE',
                 payload: { ...pedidoEntregue, STATUS: 'ENTREGUE' },
             });
-            console.log("AppContext - Pedido entregue enviado com sucesso");
+            console.log("AppContext - Pedido entregue enviado com sucesso (Aqui o pedido é enviado)");
         } else {
             throw new Error('Falha ao processar pedido entregue no servidor');
         }

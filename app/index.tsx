@@ -27,9 +27,13 @@ export default function Index() {
     try {
       await login(username, password);
       // Aguardamos a atualização do estado via useEffect
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro no login:", error);
-      Alert.alert("", "Ocorreu um erro durante o login. Tente novamente.");
+      if(error.message === 'Falha na autenticação'){
+        Alert.alert("Aviso", "Usuário ou senha inválidos");
+      }else{
+        Alert.alert("", "Ocorreu um erro durante o login. Tente novamente.");
+      }
     } finally {
       setIsLoading(false);
     }
