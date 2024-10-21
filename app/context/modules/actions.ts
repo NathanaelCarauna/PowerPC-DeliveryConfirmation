@@ -4,7 +4,7 @@ import { simulateApiCall, simulateFetchPedido, simulateSendPedidoEntregue } from
 import * as Print from 'expo-print';
 import * as FileSystem from 'expo-file-system';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-export const API_BASE_URL = 'https://b9e6-2804-954-ff12-cb00-ccbd-bf6f-798f-812.ngrok-free.app/api/'
+export const API_BASE_URL = 'https://c82b-2804-954-ff12-cb00-e46b-226f-8a51-d291.ngrok-free.app/api/'
 import {Alert} from 'react-native';
 
 export const login = (dispatch: Dispatch<Action>) => async (username: string, password: string) => {
@@ -264,10 +264,31 @@ export const setSelectedFilial = (dispatch: Dispatch<Action>) => (filial: Retorn
     });
 };
 
+export const getFileNameFromUri = (uri: String) => {
+  const uriParts = uri.split('/');
+  const fileName = uriParts[uriParts.length - 1];
+  return fileName;
+};
+
 export const sendPedidoEntregue = (dispatch: Dispatch<Action>) => async (pedidoEntregue: PedidoEntregue) => {
     console.log("AppContext - Enviando pedido entregue para o servidor:", pedidoEntregue.ID_PEDIDO);
+    const token = await AsyncStorage.getItem('userToken');
     try {
-        const response = await simulateSendPedidoEntregue(pedidoEntregue);
+        const formData = new FormData();
+        formData.append('file', {
+          uri: pedidoEntregue.Documento,
+          name: getFileNameFromUri(pedidoEntregue.Documento),
+          type: 'application/pdf',
+        });
+        
+        const response = await fetch(API_BASE_URL+'authentication/entrega/' + token, {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'Content-Type': 'multipart/form-data',
+              'Authorization': 'Bearer ' + token
+            },
+          });
         
         if (!response.ok) {
             throw new Error('Erro ao enviar pedido entregue');
@@ -280,7 +301,7 @@ export const sendPedidoEntregue = (dispatch: Dispatch<Action>) => async (pedidoE
                 type: 'SEND_PEDIDO_ENTREGUE',
                 payload: { ...pedidoEntregue, STATUS: 'ENTREGUE' },
             });
-            console.log("AppContext - Pedido entregue enviado com sucesso (Aqui o pedido é enviado)");
+            console.log("AppContext - Pedido entregue enviado com sucesso");
         } else {
             throw new Error('Falha ao processar pedido entregue no servidor');
         }
