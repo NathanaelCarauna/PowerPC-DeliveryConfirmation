@@ -4,20 +4,20 @@ import { simulateApiCall, simulateFetchPedido, simulateSendPedidoEntregue } from
 import * as Print from 'expo-print';
 import * as FileSystem from 'expo-file-system';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-export const API_BASE_URL = 'https://c82b-2804-954-ff12-cb00-e46b-226f-8a51-d291.ngrok-free.app/api/'
+export const API_BASE_URL = 'http://mail.gpj.com.br:9093/api/'
 import {Alert} from 'react-native';
 
 export const login = (dispatch: Dispatch<Action>) => async (username: string, password: string) => {
     console.log("AppContext - Iniciando processo de login para o usuário:", username);
     try {
         //Chamada à API para autenticar o usuário
-        const response = await fetch(API_BASE_URL+'authentication/login', {
+        const response = await fetch(API_BASE_URL+'Login', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            email: username,
+            tx_Login: username,
             senha: password,
           }),
         });
@@ -54,12 +54,12 @@ export const login = (dispatch: Dispatch<Action>) => async (username: string, pa
     }
 };
 
-export const fetchPedido = (dispatch: Dispatch<Action>) => async (idPedido: number) => {
+export const fetchPedido = (dispatch: Dispatch<Action>) => async (idPedido: number, idFilial: number) => {
     console.log("AppContext - Iniciando busca do pedido:", idPedido);
     try {
         //Chamada à API para buscar o pedido
         const token = await AsyncStorage.getItem('userToken');
-        const response = await fetch(API_BASE_URL+'pedido/pedidoById/' + idPedido, {
+        const response = await fetch(API_BASE_URL+'Pedido/CarregarPedidoPorId?idFilial=' + idFilial + '&idPedido=' + idPedido, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -69,22 +69,21 @@ export const fetchPedido = (dispatch: Dispatch<Action>) => async (idPedido: numb
         if(response.ok){
           const data = await response.json();
           console.log("AppContext - Pedido encontrado:", idPedido);
+          console.log("---------------------", data);
           const pedido: Pedido = {
-            ID_PEDIDO: data.id,
-            NM_CLIENTE: data.nome_cliente,
-            DT_PEDIDO: data.dataPedido,
-            ID_PROCESSO_VENDA: data.id_processo_venda,
-            DOC_CLIENTE: data.documento_cliente,
-            Itens: [
-              {
-                ID_ITEM_PROCESSO_VENDA_PRODUTO: data.itens.id_processo_venda_produto,
-                ID_PROCESSO_VENDA: data.itens.id_processo_venda,
-                ID_PRODUTO: data.itens.id,
-                NM_PRODUTO: data.itens.nome,
-                QN_PRODUTO: data.itens.quantidade,
-              }
-            ],
-          };
+            ID_PEDIDO: data[0].id,
+            NM_CLIENTE: data[0].nome_cliente,
+            DT_PEDIDO: data[0].datapedido,
+            ID_PROCESSO_VENDA: data[0].id_processo_venda,
+            DOC_CLIENTE: data[0].documento_cliente,
+            Itens: data[0].itens_Id.map((item: any) => ({
+                ID_ITEM_PROCESSO_VENDA_PRODUTO: item.id_item_processo_venda_produto,
+                ID_PROCESSO_VENDA: item.id_processo_venda,
+                ID_PRODUTO: item.id_produto,
+                NM_PRODUTO: item.nm_produto,
+                QN_PRODUTO: item.qn_produto,
+            })),
+        };
           dispatch({
             type: 'ADD_PEDIDO',
             payload: pedido
@@ -275,7 +274,7 @@ export const sendPedidoEntregue = (dispatch: Dispatch<Action>) => async (pedidoE
     const token = await AsyncStorage.getItem('userToken');
     try {
         const formData = new FormData();
-        formData.append('file', {
+        /*formData.append('file', {
           uri: pedidoEntregue.Documento,
           name: getFileNameFromUri(pedidoEntregue.Documento),
           type: 'application/pdf',
@@ -304,7 +303,7 @@ export const sendPedidoEntregue = (dispatch: Dispatch<Action>) => async (pedidoE
             console.log("AppContext - Pedido entregue enviado com sucesso");
         } else {
             throw new Error('Falha ao processar pedido entregue no servidor');
-        }
+        }*/
     } catch (error) {
         console.error("AppContext - Erro ao enviar pedido entregue:", error);
         dispatch({

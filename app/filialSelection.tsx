@@ -32,7 +32,7 @@ export default function FilialSelection() {
       return;
     }
 
-    const filial = state.user?.filiais.find(f => f.id.toString() === selectedFilial);
+    const filial = state.user?.filiais.find(f => f.id_Filial.toString() === selectedFilial);
     if (filial) {
       console.log("FilialSelection - Filial encontrada:", filial);
       dispatch({ type: 'SET_SELECTED_FILIAL', payload: filial });
@@ -88,8 +88,8 @@ export default function FilialSelection() {
               setSelectedFilial(itemValue);
             }}
             items={state.user.filiais.map(filial => ({
-              label: filial.nome,
-              value: filial.id.toString()
+              label: filial.tx_Apelido,
+              value: filial.id_Filial.toString()
             }))}
           />
         </ThemedView>

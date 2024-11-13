@@ -48,7 +48,7 @@ export default function Home() {
 
     setIsLoading(true);
     try {
-      await fetchPedido(pedidoId);
+      await fetchPedido(pedidoId, state.selectedFilial?.id_Filial); 
       console.log("Home - Pedido buscado com sucesso");
       setSearchQuery('');
       Keyboard.dismiss();

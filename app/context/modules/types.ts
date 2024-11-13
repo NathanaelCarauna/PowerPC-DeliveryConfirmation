@@ -1,8 +1,8 @@
 import { Dispatch } from 'react';
 
 export type RetornoFilialDto = {
-    id: number;
-    nome: string;
+    id_Filial: number;
+    tx_Apelido: string;
 };
 
 export type User = {
@@ -78,7 +78,7 @@ export type AppContextType = {
     state: AppState;
     dispatch: Dispatch<Action>;
     login: (username: string, password: string) => Promise<void>;
-    fetchPedido: (idPedido: number) => Promise<void>;
+    fetchPedido: (idPedido: number, idFilial: number) => Promise<void>;
     removePedido: (idPedido: number) => void;
     getPedidos: () => Pedido[];
     getPedidosEntregues: () => PedidoEntregue[];
