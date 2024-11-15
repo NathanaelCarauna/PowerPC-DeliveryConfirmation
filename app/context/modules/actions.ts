@@ -273,16 +273,17 @@ export const sendPedidoEntregue = (dispatch: Dispatch<Action>) => async (pedidoE
     console.log("AppContext - Enviando pedido entregue para o servidor:", pedidoEntregue.ID_PEDIDO);
     const token = await AsyncStorage.getItem('userToken');
     try {
-        const formData = new FormData();
-        /*formData.append('file', {
+      const FormData = require('form-data');
+      const form = new FormData();
+      form.append('file', {
           uri: pedidoEntregue.Documento,
           name: getFileNameFromUri(pedidoEntregue.Documento),
           type: 'application/pdf',
         });
         
-        const response = await fetch(API_BASE_URL+'authentication/entrega/' + token, {
+        const response = await fetch('http://localhost:8080/api/entrega/create?user_id=1&pedido_id=1', {
             method: 'POST',
-            body: formData,
+            body: form,
             headers: {
               'Content-Type': 'multipart/form-data',
               'Authorization': 'Bearer ' + token
@@ -294,8 +295,9 @@ export const sendPedidoEntregue = (dispatch: Dispatch<Action>) => async (pedidoE
         }
 
         const responseData = await response.json();
+        console.log("Json resposta: ", responseData);
 
-        if (responseData.success) {
+        /*if (responseData.success) {
             dispatch({
                 type: 'SEND_PEDIDO_ENTREGUE',
                 payload: { ...pedidoEntregue, STATUS: 'ENTREGUE' },
