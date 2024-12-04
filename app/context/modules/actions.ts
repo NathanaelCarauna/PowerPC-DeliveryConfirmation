@@ -6,7 +6,6 @@ import * as FileSystem from 'expo-file-system';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 export const API_BASE_URL = 'http://mail.gpj.com.br:9093/api/'
 import {Alert} from 'react-native';
-import RNFS from 'react-native-fs';
 
 export const login = (dispatch: Dispatch<Action>) => async (username: string, password: string) => {
     console.log("AppContext - Iniciando processo de login para o usuário:", username);
@@ -274,14 +273,17 @@ export const sendPedidoEntregue = (dispatch: Dispatch<Action>) => async (pedidoE
     console.log("AppContext - Enviando pedido entregue para o servidor:", pedidoEntregue.ID_PEDIDO);
     const token = await AsyncStorage.getItem('userToken');
     try {
-      const fileBase64 = await RNFS.readFile(pedidoEntregue.Documento, 'base64');
+      const fileBase64 = await FileSystem.readAsStringAsync(pedidoEntregue.Documento, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      //const fileBase64 = await RNFS.readFile(pedidoEntregue.Documento, 'base64');
       const payload = {
         id_usuario: 1,
         id_pedido: 1,
         documento: fileBase64,
       };
 
-      const response = await fetch('http://localhost:8080/api/entrega/create', {
+      const response = await fetch('https://aa85-2804-954-ffec-4900-a8c3-87d2-c385-e1a8.ngrok-free.app/api/entrega/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
