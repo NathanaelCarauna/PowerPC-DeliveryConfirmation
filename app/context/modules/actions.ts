@@ -71,12 +71,12 @@ export const fetchPedido = (dispatch: Dispatch<Action>) => async (idPedido: numb
           console.log("AppContext - Pedido encontrado:", idPedido);
           console.log("---------------------", data);
           const pedido: Pedido = {
-            ID_PEDIDO: data[0].id,
-            NM_CLIENTE: data[0].nome_cliente,
-            DT_PEDIDO: data[0].datapedido,
-            ID_PROCESSO_VENDA: data[0].id_processo_venda,
-            DOC_CLIENTE: data[0].documento_cliente,
-            Itens: data[0].itens_Id.map((item: any) => ({
+            ID_PEDIDO: data.id,
+            NM_CLIENTE: data.nome_cliente,
+            DT_PEDIDO: data.datapedido,
+            ID_PROCESSO_VENDA: data.id_processo_venda,
+            DOC_CLIENTE: data.documento_cliente,
+            Itens: data.itens_Id.map((item: any) => ({
                 ID_ITEM_PROCESSO_VENDA_PRODUTO: item.id_item_processo_venda_produto,
                 ID_PROCESSO_VENDA: item.id_processo_venda,
                 ID_PRODUTO: item.id_produto,
@@ -283,48 +283,27 @@ export const sendPedidoEntregue = (dispatch: Dispatch<Action>) => async (pedidoE
         documento: fileBase64,
       };
 
-      const response = await fetch('https://aa85-2804-954-ffec-4900-a8c3-87d2-c385-e1a8.ngrok-free.app/api/entrega/create', {
+      const response = await fetch(API_BASE_URL+'Entrega/CriarDocumento', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + token
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(payload),
       });
 
-      /*const FormData = require('form-data');
-      const form = new FormData();
-      form.append('file', {
-          uri: pedidoEntregue.Documento,
-          name: getFileNameFromUri(pedidoEntregue.Documento),
-          type: 'application/pdf',
+      const textResponse = await response.text();
+      const responseData = textResponse ? JSON.parse(textResponse) : null;
+      console.log("Json resposta: ", responseData);
+
+      if (!responseData || responseData.success) {
+        dispatch({
+            type: 'SEND_PEDIDO_ENTREGUE',
+            payload: { ...pedidoEntregue, STATUS: 'ENTREGUE' },
         });
-        
-        const response = await fetch('http://localhost:8080/api/entrega/create?user_id=1&pedido_id=1', {
-            method: 'POST',
-            body: form,
-            headers: {
-              'Content-Type': 'multipart/form-data',
-              'Authorization': 'Bearer ' + token
-            },
-          });
-        */
-        if (!response.ok) {
-            throw new Error('Erro ao enviar pedido entregue');
-        }
-
-        const responseData = await response.json();
-        console.log("Json resposta: ", responseData);
-
-        /*if (responseData.success) {
-            dispatch({
-                type: 'SEND_PEDIDO_ENTREGUE',
-                payload: { ...pedidoEntregue, STATUS: 'ENTREGUE' },
-            });
-            console.log("AppContext - Pedido entregue enviado com sucesso");
-        } else {
-            throw new Error('Falha ao processar pedido entregue no servidor');
-        }*/
+        console.log("AppContext - Pedido entregue enviado com sucesso");
+      } else {
+          throw new Error('Falha ao processar pedido entregue no servidor');
+      }
     } catch (error) {
         console.error("AppContext - Erro ao enviar pedido entregue:", error);
         dispatch({
