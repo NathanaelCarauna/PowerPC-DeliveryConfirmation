@@ -6,6 +6,7 @@ import * as FileSystem from 'expo-file-system';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 export const API_BASE_URL = 'http://mail.gpj.com.br:9093/api/'
 import {Alert} from 'react-native';
+import RNFS from 'react-native-fs';
 
 export const login = (dispatch: Dispatch<Action>) => async (username: string, password: string) => {
     console.log("AppContext - Iniciando processo de login para o usuário:", username);
@@ -273,7 +274,23 @@ export const sendPedidoEntregue = (dispatch: Dispatch<Action>) => async (pedidoE
     console.log("AppContext - Enviando pedido entregue para o servidor:", pedidoEntregue.ID_PEDIDO);
     const token = await AsyncStorage.getItem('userToken');
     try {
-      const FormData = require('form-data');
+      const fileBase64 = await RNFS.readFile(pedidoEntregue.Documento, 'base64');
+      const payload = {
+        id_usuario: 1,
+        id_pedido: 1,
+        documento: fileBase64,
+      };
+
+      const response = await fetch('http://localhost:8080/api/entrega/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify(payload),
+      });
+
+      /*const FormData = require('form-data');
       const form = new FormData();
       form.append('file', {
           uri: pedidoEntregue.Documento,
@@ -289,7 +306,7 @@ export const sendPedidoEntregue = (dispatch: Dispatch<Action>) => async (pedidoE
               'Authorization': 'Bearer ' + token
             },
           });
-        
+        */
         if (!response.ok) {
             throw new Error('Erro ao enviar pedido entregue');
         }
