@@ -1,4 +1,4 @@
-import { Dispatch } from 'react';
+import { Dispatch, useState } from 'react';
 import { Action, User, Pedido, FotoTipo, RetornoFilialDto, PedidoEntregue, AppState } from './types';
 import { simulateApiCall, simulateFetchPedido, simulateSendPedidoEntregue } from './utils';
 import * as Print from 'expo-print';
@@ -6,6 +6,7 @@ import * as FileSystem from 'expo-file-system';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 export const API_BASE_URL = 'http://mail.gpj.com.br:9093/api/'
 import {Alert} from 'react-native';
+import * as Location from 'expo-location';
 
 export const login = (dispatch: Dispatch<Action>) => async (username: string, password: string) => {
     console.log("AppContext - Iniciando processo de login para o usuário:", username);
@@ -132,11 +133,22 @@ export const generatePDF = (state: { pedidos: Pedido[], assinaturas: Record<numb
     const pedido = state.pedidos.find(p => p.ID_PEDIDO === pedidoId);
     const assinatura = state.assinaturas[pedidoId];
     const fotos = state.fotos[pedidoId] || {};
+    const { status } = await Location.requestForegroundPermissionsAsync();
 
-    if (!pedido || !assinatura || !fotos.produto || !fotos.documento || !fotos.canhoto) {
+    if (!pedido || !assinatura || !fotos.produto || !fotos.documento || !fotos.canhoto || status !== 'granted') {
         console.error("AppContext - Dados insuficientes para gerar o PDF");
         throw new Error('Dados insuficientes para gerar o PDF');
     }
+
+    const currentLocation = await Location.getCurrentPositionAsync({});
+    const latitude = currentLocation.coords.latitude;
+    const longitude = currentLocation.coords.longitude;
+
+    if(!latitude || !longitude){
+      console.error("AppContext - Latitude e longitude indisponíveis");
+      throw new Error('Dados insuficientes para gerar o PDF');
+    }
+
 
     // Função para converter imagem em Base64
     const convertImageToBase64 = async (uri: string) => {
@@ -233,7 +245,7 @@ export const generatePDF = (state: { pedidos: Pedido[], assinaturas: Record<numb
 
           <div class="footer">
             <p>Data e Hora: ${new Date().toLocaleString()}</p>
-            <p>Geolocalização: [Latitude, Longitude]</p>
+            <p>Geolocalização: [Latitude: ${latitude}, Longitude: ${longitude}]</p>
           </div>
 
           <div class="legal">

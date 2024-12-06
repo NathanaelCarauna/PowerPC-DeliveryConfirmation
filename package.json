@@ -48,7 +48,8 @@
     "react-native-screens": "3.31.1",
     "react-native-signature-canvas": "^4.7.2",
     "react-native-web": "~0.19.10",
-    "react-native-webview": "13.8.6"
+    "react-native-webview": "13.8.6",
+    "expo-location": "~17.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.24.0",
