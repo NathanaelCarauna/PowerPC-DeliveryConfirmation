@@ -298,7 +298,8 @@ export const sendPedidoEntregue = (dispatch: Dispatch<Action>) => async (pedidoE
       const response = await fetch(API_BASE_URL+'Entrega/CriarDocumento', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
         },
         body: JSON.stringify(payload),
       });
