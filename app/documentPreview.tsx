@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrollView, StyleSheet, View, Image } from 'react-native';
+import { ScrollView, StyleSheet, View, Image, Dimensions } from 'react-native';
 import { CustomButton } from "@/components/CustomButtom";
 import LogoBackground from "@/components/LogoBackground";
 import { ThemedText } from "@/components/ThemedText";
@@ -14,6 +14,10 @@ export default function DocumentPreview() {
   const { state } = useAppContext();
   const pedidos = state.pedidos;
   const [isScrolledToEnd, setIsScrolledToEnd] = useState(false); // Adicione este estado
+
+  // Detecta se é tablet baseado no tamanho da tela
+  const { width, height } = Dimensions.get('window');
+  const isTablet = Math.max(width, height) >= 768;
 
   function handlePress() {
     console.log("Assinar button pressed");
@@ -102,7 +106,10 @@ export default function DocumentPreview() {
 
         {/* Card de informação dentro do ScrollView */}
         <View style={styles.infoCard}>
-          <ThemedText style={styles.infoCardText}>
+          <ThemedText style={[
+            styles.infoCardText,
+            isTablet && styles.infoCardTextTablet
+          ]}>
             Prezado(a) {pedidos[0]?.NM_CLIENTE},
             Informamos que a entrega da mercadoria foi realizada com sucesso na data de hoje, {new Date().toLocaleDateString()}, no endereço especificado na Nota Fiscal.
             Para validar a conferência e o recebimento dos itens entregues, solicitamos gentilmente que seja feita a assinatura eletrônica no aplicativo, confirmando que tudo está conforme o pedido e em conformidade com as leis vigentes.
@@ -248,5 +255,8 @@ const styles = StyleSheet.create({
   infoCardText: {
     fontSize: 14,
     color: '#333',
+  },
+  infoCardTextTablet: {
+    fontSize: 18,
   },
 });
