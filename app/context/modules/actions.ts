@@ -291,7 +291,7 @@ export const sendPedidoEntregue = (dispatch: Dispatch<Action>) => async (pedidoE
       //const fileBase64 = await RNFS.readFile(pedidoEntregue.Documento, 'base64');
       const payload = {
         id_usuario: 1,
-        id_pedido: 1,
+        id_pedido: pedidoEntregue.ID_PEDIDO,
         documento: fileBase64,
       };
 
