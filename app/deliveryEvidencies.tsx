@@ -117,7 +117,11 @@ export default function DeliveryEvidencies() {
               return (
                 <View key={pedido.ID_PEDIDO} style={styles.pedidoCard}>
                   <View style={styles.pedidoHeader}>
-                    <ThemedText style={styles.clienteName}>{pedido.NM_CLIENTE}</ThemedText>
+                    <View style={styles.clienteNameContainer}>
+                      <ThemedText numberOfLines={2} style={styles.clienteName}>
+                        {pedido.NM_CLIENTE}
+                      </ThemedText>
+                    </View>
                     <View style={styles.pedidoIdContainer}>
                       <ThemedText style={styles.pedidoId}>Pedido #{pedido.ID_PEDIDO}</ThemedText>
                       {hasAllPhotos(pedido.ID_PEDIDO) && (
@@ -229,12 +233,17 @@ const styles = StyleSheet.create({
   pedidoHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
+    alignItems: 'flex-start',
+    marginBottom: 15,
+  },
+  clienteNameContainer: {
+    flex: 1,
+    marginRight: 10,
   },
   clienteName: {
     fontSize: 18,
     fontWeight: 'bold',
+    flexWrap: 'wrap',
   },
   pedidoId: {
     fontSize: 14,
@@ -308,8 +317,8 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
   },
   pedidoIdContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexShrink: 0,
+    alignItems: 'flex-end',
   },
   checkIcon: {
     marginLeft: 5,

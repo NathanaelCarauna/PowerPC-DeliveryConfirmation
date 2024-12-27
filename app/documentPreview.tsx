@@ -65,8 +65,14 @@ export default function DocumentPreview() {
           return (
             <View key={pedido.ID_PEDIDO} style={styles.documentContainer}>
               <View style={styles.pedidoHeader}>
-                <ThemedText style={styles.clienteName}>{pedido.NM_CLIENTE}</ThemedText>
-                <ThemedText style={styles.pedidoId}>Pedido #{pedido.ID_PEDIDO}</ThemedText>
+                <View style={styles.clienteNameContainer}>
+                  <ThemedText numberOfLines={2} style={styles.clienteName}>
+                    {pedido.NM_CLIENTE}
+                  </ThemedText>
+                </View>
+                <View style={styles.pedidoIdContainer}>
+                  <ThemedText style={styles.pedidoId}>Pedido #{pedido.ID_PEDIDO}</ThemedText>
+                </View>
               </View>
 
               <View style={styles.pedidoInfo}>
@@ -186,12 +192,21 @@ const styles = StyleSheet.create({
   pedidoHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     marginBottom: 15,
+  },
+  clienteNameContainer: {
+    flex: 1,
+    marginRight: 10,
   },
   clienteName: {
     fontSize: 18,
     fontWeight: 'bold',
+    flexWrap: 'wrap',
+  },
+  pedidoIdContainer: {
+    flexShrink: 0,
+    alignItems: 'flex-end',
   },
   pedidoId: {
     fontSize: 14,
