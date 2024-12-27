@@ -8,6 +8,28 @@ export const API_BASE_URL = 'http://mail.gpj.com.br:9093/api/'
 import {Alert} from 'react-native';
 import * as Location from 'expo-location';
 
+const formatarDocumento = (doc: string): { tipo: string, valor: string } => {
+    // Remove espaços e caracteres especiais
+    const documento = doc.replace(/[^\d]/g, '');
+    
+    if (documento.length === 11) {
+        return {
+            tipo: 'CPF',
+            valor: documento.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4')
+        };
+    } else if (documento.length === 14) {
+        return {
+            tipo: 'CNPJ',
+            valor: documento.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5')
+        };
+    }
+    
+    return {
+        tipo: 'Documento',
+        valor: doc.trim()
+    };
+};
+
 export const login = (dispatch: Dispatch<Action>) => async (username: string, password: string) => {
     console.log("AppContext - Iniciando processo de login para o usuário:", username);
     try {
@@ -140,6 +162,11 @@ export const generatePDF = (state: { pedidos: Pedido[], assinaturas: Record<numb
 
     console.log("2. Iniciando conversão das imagens");
     try {
+        // Pré-processamento dos dados
+        const dataPedido = new Date(pedido.DT_PEDIDO).toLocaleDateString();
+        const dataAtual = new Date().toLocaleDateString();
+        const documentoInfo = formatarDocumento(pedido.DOC_CLIENTE);
+
         // Processando uma imagem por vez
         console.log("2.1 Processando documento");
         const documentoBase64 = await FileSystem.readAsStringAsync(fotos.documento, { 
@@ -156,7 +183,6 @@ export const generatePDF = (state: { pedidos: Pedido[], assinaturas: Record<numb
             encoding: FileSystem.EncodingType.Base64 
         });
 
-        const dataEntrega = new Date(pedido.DT_PEDIDO).toLocaleDateString();
         console.log("3. Gerando HTML");
         const htmlContent = `
         <!DOCTYPE html>
@@ -181,14 +207,25 @@ export const generatePDF = (state: { pedidos: Pedido[], assinaturas: Record<numb
 
               <div class="section">
                 <h3>Dados do Cliente</h3>
-                <p>Nome: ${pedido.NM_CLIENTE}</p>
-                <p>Documento: ${pedido.DOC_CLIENTE}</p>
-                <p>Data: ${dataEntrega}</p>
+                <div class="info-grid">
+                  <div class="info-item">
+                    <span class="info-label">Nome:</span>
+                    <span>${pedido.NM_CLIENTE}</span>
+                  </div>
+                  <div class="info-item">
+                    <span class="info-label">${documentoInfo.tipo}:</span>
+                    <span>${documentoInfo.valor}</span>
+                  </div>
+                  <div class="info-item">
+                    <span class="info-label">Data do Pedido:</span>
+                    <span>${dataPedido}</span>
+                  </div>
+                </div>
               </div>
 
               <div class="section">
                 <p>Prezados(as) ${pedido.NM_CLIENTE},</p>
-                <p>A entrega da mercadoria foi realizada com sucesso na data de ${dataEntrega}, no endereço especificado na Nota Fiscal.</p>
+                <p>A entrega da mercadoria foi realizada com sucesso na data de ${dataPedido}, no endereço especificado na Nota Fiscal.</p>
                 <p>Para validar a conferência e o recebimento dos itens entregues, solicitamos que fosse feita a assinatura eletrônica no aplicativo, confirmando que tudo estava conforme o pedido.</p>
                 <p>A assinatura eletrônica serviu como comprovação de que a mercadoria foi conferida junto ao nosso motorista no momento da entrega. Foi necessário, também, que nos enviassem uma cópia de um documento com foto.</p>
                 <p>A coleta dos dados pessoais foi realizada de acordo com a Lei Geral de Proteção de Dados (LGPD).</p>

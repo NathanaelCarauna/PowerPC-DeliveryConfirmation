@@ -70,6 +70,27 @@ export default function DeliveryEvidencies() {
     });
   };
 
+  const formatarDocumento = (doc: string): { tipo: string, valor: string } => {
+    const documento = doc.replace(/[^\d]/g, '');
+    
+    if (documento.length === 11) {
+      return {
+        tipo: 'CPF',
+        valor: documento.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4')
+      };
+    } else if (documento.length === 14) {
+      return {
+        tipo: 'CNPJ',
+        valor: documento.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5')
+      };
+    }
+    
+    return {
+      tipo: 'Documento',
+      valor: doc.trim()
+    };
+  };
+
   if (isLoading) {
     return (
       <ThemedView style={[styles.container, styles.centerContent]}>
@@ -91,40 +112,47 @@ export default function DeliveryEvidencies() {
           {pedidos.length === 0 ? (
             <ThemedText style={styles.noPedidosText}>Nenhum pedido disponível.</ThemedText>
           ) : (
-            pedidos.map((pedido) => (
-              <View key={pedido.ID_PEDIDO} style={styles.pedidoCard}>
-                <View style={styles.pedidoHeader}>
-                  <ThemedText style={styles.clienteName}>{pedido.NM_CLIENTE}</ThemedText>
-                  <View style={styles.pedidoIdContainer}>
-                    <ThemedText style={styles.pedidoId}>Pedido #{pedido.ID_PEDIDO}</ThemedText>
-                    {hasAllPhotos(pedido.ID_PEDIDO) && (
-                      <MaterialIcons name="check-circle" size={20} color="green" style={styles.checkIcon} />
-                    )}
-                  </View>
-                </View>
-                <View style={styles.pedidoInfo}>
-                  <View style={styles.infoRow}>
-                    <Ionicons name="calendar-outline" size={16} color="#666" />
-                    <ThemedText style={styles.infoText}>{new Date(pedido.DT_PEDIDO).toLocaleDateString()}</ThemedText>
-                  </View>
-                  <View style={styles.infoRow}>
-                    <Ionicons name="document-text-outline" size={16} color="#666" />
-                    <ThemedText style={styles.infoText}>{pedido.DOC_CLIENTE}</ThemedText>
-                  </View>
-                </View>
-                <View style={styles.itensList}>
-                  {pedido.Itens.map((item, itemIndex) => (
-                    <View key={itemIndex} style={styles.itemRow}>
-                      <View style={styles.itemNameContainer}>
-                        <ThemedText style={styles.itemCode}>{item.ID_PRODUTO} - </ThemedText>
-                        <ThemedText style={styles.itemName}>{item.NM_PRODUTO}</ThemedText>
-                      </View>
-                      <ThemedText style={styles.itemQuantity}>{item.QN_PRODUTO}x</ThemedText>
+            pedidos.map((pedido) => {
+              const documentoInfo = formatarDocumento(pedido.DOC_CLIENTE);
+              return (
+                <View key={pedido.ID_PEDIDO} style={styles.pedidoCard}>
+                  <View style={styles.pedidoHeader}>
+                    <ThemedText style={styles.clienteName}>{pedido.NM_CLIENTE}</ThemedText>
+                    <View style={styles.pedidoIdContainer}>
+                      <ThemedText style={styles.pedidoId}>Pedido #{pedido.ID_PEDIDO}</ThemedText>
+                      {hasAllPhotos(pedido.ID_PEDIDO) && (
+                        <MaterialIcons name="check-circle" size={20} color="green" style={styles.checkIcon} />
+                      )}
                     </View>
-                  ))}
+                  </View>
+                  <View style={styles.pedidoInfo}>
+                    <View style={styles.infoRow}>
+                      <Ionicons name="calendar-outline" size={16} color="#121212" />
+                      <ThemedText style={styles.infoText}>
+                        {new Date(pedido.DT_PEDIDO).toLocaleDateString()}
+                      </ThemedText>
+                    </View>
+                    <View style={styles.infoRow}>
+                      <Ionicons name="document-text-outline" size={16} color="#121212" />
+                      <ThemedText style={styles.infoText}>
+                        {documentoInfo.tipo}: {documentoInfo.valor}
+                      </ThemedText>
+                    </View>
+                  </View>
+                  <View style={styles.itensList}>
+                    {pedido.Itens.map((item, itemIndex) => (
+                      <View key={itemIndex} style={styles.itemRow}>
+                        <View style={styles.itemNameContainer}>
+                          <ThemedText style={styles.itemCode}>{item.ID_PRODUTO} - </ThemedText>
+                          <ThemedText style={styles.itemName}>{item.NM_PRODUTO}</ThemedText>
+                        </View>
+                        <ThemedText style={styles.itemQuantity}>{item.QN_PRODUTO}x</ThemedText>
+                      </View>
+                    ))}
+                  </View>
                 </View>
-              </View>
-            ))
+              );
+            })
           )}
         </View>
       </ScrollView>
@@ -210,7 +238,7 @@ const styles = StyleSheet.create({
   },
   pedidoId: {
     fontSize: 14,
-    color: '#666',
+    color: '#121212',
   },
   pedidoInfo: {
     marginBottom: 10,
@@ -223,7 +251,7 @@ const styles = StyleSheet.create({
   infoText: {
     marginLeft: 8,
     fontSize: 14,
-    color: '#666',
+    color: '#121212',
   },
   itensList: {
     borderTopWidth: 1,
@@ -244,7 +272,7 @@ const styles = StyleSheet.create({
   itemCode: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#666',
+    color: '#121212',
     marginRight: 5,
   },
   itemName: {
