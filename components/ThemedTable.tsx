@@ -25,7 +25,7 @@ export function ThemedTable({ data, onRemoveItem }: ThemedTableProps) {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [4, 3],
-      quality: 0.5,
+      quality: 0.3,
       exif: false,
       base64: false,
     });

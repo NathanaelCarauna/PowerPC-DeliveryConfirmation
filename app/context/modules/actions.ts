@@ -196,6 +196,22 @@ export const generatePDF = (state: { pedidos: Pedido[], assinaturas: Record<numb
               .section { margin-bottom: 20px; }
               .photo { max-width: 200px; height: auto; }
               .anexo { max-width: 90%; height: auto; }
+              .produtos-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin: 20px 0;
+              }
+              .produtos-table th, .produtos-table td {
+                border: 1px solid #ddd;
+                padding: 8px;
+                text-align: left;
+              }
+              .produtos-table th {
+                background-color: #f5f5f5;
+              }
+              .produtos-table tr:nth-child(even) {
+                background-color: #fafafa;
+              }
             </style>
           </head>
           <body>
@@ -221,6 +237,28 @@ export const generatePDF = (state: { pedidos: Pedido[], assinaturas: Record<numb
                     <span>${dataPedido}</span>
                   </div>
                 </div>
+              </div>
+
+              <div class="section">
+                <h3>Produtos do Pedido</h3>
+                <table class="produtos-table">
+                  <thead>
+                    <tr>
+                      <th>Código</th>
+                      <th>Produto</th>
+                      <th>Quantidade</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${pedido.Itens.map(item => `
+                      <tr>
+                        <td>${item.ID_PRODUTO}</td>
+                        <td>${item.NM_PRODUTO}</td>
+                        <td>${item.QN_PRODUTO}</td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
               </div>
 
               <div class="section">
