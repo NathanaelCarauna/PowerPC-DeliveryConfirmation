@@ -7,6 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export const API_BASE_URL = 'http://mail.gpj.com.br:9093/api/'
 import {Alert} from 'react-native';
 import * as Location from 'expo-location';
+import Geocoder from 'react-native-geocoding';
 
 const formatarDocumento = (doc: string): { tipo: string, valor: string } => {
     // Remove espaços e caracteres especiais
@@ -154,13 +155,36 @@ export const generatePDF = (state: { pedidos: Pedido[], assinaturas: Record<numb
     const pedido = state.pedidos.find(p => p.ID_PEDIDO === pedidoId);
     const assinatura = state.assinaturas[pedidoId];
     const fotos = state.fotos[pedidoId] || {};
+    const { status } = await Location.requestForegroundPermissionsAsync();
 
-    if (!pedido || !assinatura || !fotos.produto || !fotos.documento || !fotos.canhoto) {
+    if (!pedido || !assinatura || !fotos.produto || !fotos.documento || !fotos.canhoto || status !== 'granted') {
         console.error("Dados insuficientes para gerar o PDF");
         throw new Error('Dados insuficientes para gerar o PDF');
     }
+    
+    console.log("2. Iniciando coleta da localização");
 
-    console.log("2. Iniciando conversão das imagens");
+    const currentLocation = await Location.getCurrentPositionAsync({});
+    const latitude = currentLocation.coords.latitude;
+    const longitude = currentLocation.coords.longitude;
+    if(!latitude || !longitude){
+      console.error("AppContext - Latitude e longitude indisponíveis");
+      throw new Error('Dados insuficientes para gerar o PDF');
+    }
+
+    console.log("3. Iniciando a conversão da localização para endereço");
+
+    Geocoder.init('AIzaSyAG0RaoU3DHxW_rcEpTzxcZHwQ5KYsjTBg');
+    try {
+      const response = await Geocoder.from(latitude, longitude);
+      const address = response.results[0].formatted_address;
+      console.log('Endereço:', address);
+    } catch (error) {
+      console.error(error);
+      throw new Error('Dados insuficientes para gerar o PDF');
+    }
+
+    console.log("4. Iniciando conversão das imagens");
     try {
         // Pré-processamento dos dados
         const dataPedido = new Date(pedido.DT_PEDIDO).toLocaleDateString();
@@ -168,22 +192,22 @@ export const generatePDF = (state: { pedidos: Pedido[], assinaturas: Record<numb
         const documentoInfo = formatarDocumento(pedido.DOC_CLIENTE);
 
         // Processando uma imagem por vez
-        console.log("2.1 Processando documento");
+        console.log("4.1 Processando documento");
         const documentoBase64 = await FileSystem.readAsStringAsync(fotos.documento, { 
             encoding: FileSystem.EncodingType.Base64 
         });
 
-        console.log("2.2 Processando canhoto");
+        console.log("4.2 Processando canhoto");
         const canhotoBase64 = await FileSystem.readAsStringAsync(fotos.canhoto, { 
             encoding: FileSystem.EncodingType.Base64 
         });
 
-        console.log("2.3 Processando produto");
+        console.log("4.3 Processando produto");
         const produtoBase64 = await FileSystem.readAsStringAsync(fotos.produto, { 
             encoding: FileSystem.EncodingType.Base64 
         });
 
-        console.log("3. Gerando HTML");
+        console.log("5. Gerando HTML");
         const htmlContent = `
         <!DOCTYPE html>
         <html>
@@ -280,6 +304,12 @@ export const generatePDF = (state: { pedidos: Pedido[], assinaturas: Record<numb
                 <h3>Assinatura</h3>
                 <img src="${assinatura}" style="width: 200px;" alt="Assinatura" />
               </div>
+
+              <div class="section">
+                <h3>Endereço da entrega</h3>
+                <p>Data e Hora: ${new Date().toLocaleString()}</p>
+                <p>Geolocalização: [Latitude: ${latitude}, Longitude: ${longitude}]</p>
+              </div>
             </div>
 
             <div class="page">
@@ -299,13 +329,13 @@ export const generatePDF = (state: { pedidos: Pedido[], assinaturas: Record<numb
           </body>
         </html>`;
 
-        console.log("4. Iniciando geração do PDF");
+        console.log("6. Iniciando geração do PDF");
         const { uri } = await Print.printToFileAsync({
             html: htmlContent,
             base64: false
         });
         
-        console.log("5. PDF gerado com sucesso:", uri);
+        console.log("7. PDF gerado com sucesso:", uri);
         return uri;
     } catch (error) {
         console.error("Erro detalhado na geração do PDF:", error);
@@ -336,7 +366,7 @@ export const sendPedidoEntregue = (dispatch: Dispatch<Action>) => async (pedidoE
       });
       //const fileBase64 = await RNFS.readFile(pedidoEntregue.Documento, 'base64');
       const payload = {
-        id_usuario: 1,
+        id_usuario: pedidoEntregue.ID_USUARIO,
         id_pedido: pedidoEntregue.ID_PEDIDO,
         documento: fileBase64,
       };

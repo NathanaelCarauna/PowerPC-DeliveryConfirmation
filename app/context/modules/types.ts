@@ -60,6 +60,7 @@ export type AppState = {
     assinaturas: Record<number, string>;
     fotos: Record<number, Fotos>;
     selectedFilial: RetornoFilialDto | null;
+    enderecoEntrega: string | null;
 };
 
 export type Action =
