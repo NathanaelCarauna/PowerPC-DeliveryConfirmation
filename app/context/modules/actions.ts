@@ -167,6 +167,7 @@ export const generatePDF = (state: { pedidos: Pedido[], assinaturas: Record<numb
     const currentLocation = await Location.getCurrentPositionAsync({});
     const latitude = currentLocation.coords.latitude;
     const longitude = currentLocation.coords.longitude;
+    const address = null;
     if(!latitude || !longitude){
       console.error("AppContext - Latitude e longitude indisponíveis");
       throw new Error('Dados insuficientes para gerar o PDF');
@@ -308,7 +309,7 @@ export const generatePDF = (state: { pedidos: Pedido[], assinaturas: Record<numb
               <div class="section">
                 <h3>Endereço da entrega</h3>
                 <p>Data e Hora: ${new Date().toLocaleString()}</p>
-                <p>Geolocalização: [Latitude: ${latitude}, Longitude: ${longitude}]</p>
+                <p>Endereço: ${address}</p>
               </div>
             </div>
 
