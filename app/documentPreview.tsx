@@ -143,7 +143,7 @@ export default function DocumentPreview() {
             styles.infoCardText,
             isTablet && styles.infoCardTextTablet
           ]}>
-            Prezado(a) {pedidos[0]?.NM_CLIENTE},
+            {pedidos.length > 1 ? 'Prezados(as) Clientes' : `Prezado(a) ${pedidos[0]?.NM_CLIENTE}`},
             Informamos que a entrega da mercadoria foi realizada com sucesso na data de hoje, {new Date().toLocaleDateString()}, no endereço especificado na Nota Fiscal.
             Para validar a conferência e o recebimento dos itens entregues, solicitamos gentilmente que seja feita a assinatura eletrônica no aplicativo, confirmando que tudo está conforme o pedido e em conformidade com as leis vigentes.
             A assinatura eletrônica serve como comprovação de que a mercadoria foi devidamente conferida junto ao nosso motorista/conferente no momento da entrega, conforme os procedimentos legais em vigor.
