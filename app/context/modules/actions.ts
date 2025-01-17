@@ -167,7 +167,7 @@ export const generatePDF = (state: { pedidos: Pedido[], assinaturas: Record<numb
     const currentLocation = await Location.getCurrentPositionAsync({});
     const latitude = currentLocation.coords.latitude;
     const longitude = currentLocation.coords.longitude;
-    const address = null;
+    
     if(!latitude || !longitude){
       console.error("AppContext - Latitude e longitude indisponíveis");
       throw new Error('Dados insuficientes para gerar o PDF');
@@ -176,9 +176,10 @@ export const generatePDF = (state: { pedidos: Pedido[], assinaturas: Record<numb
     console.log("3. Iniciando a conversão da localização para endereço");
 
     Geocoder.init('AIzaSyAG0RaoU3DHxW_rcEpTzxcZHwQ5KYsjTBg');
+    let address: string;
     try {
       const response = await Geocoder.from(latitude, longitude);
-      const address = response.results[0].formatted_address;
+      address = response.results[0].formatted_address;
       console.log('Endereço:', address);
     } catch (error) {
       console.error(error);
@@ -366,10 +367,25 @@ export const sendPedidoEntregue = (dispatch: Dispatch<Action>) => async (pedidoE
         encoding: FileSystem.EncodingType.Base64,
       });
       //const fileBase64 = await RNFS.readFile(pedidoEntregue.Documento, 'base64');
+      const { status } = await Location.requestForegroundPermissionsAsync();  
+      const currentLocation = await Location.getCurrentPositionAsync({});
+      const latitude = currentLocation.coords.latitude;
+      const longitude = currentLocation.coords.longitude;  
+      Geocoder.init('AIzaSyAG0RaoU3DHxW_rcEpTzxcZHwQ5KYsjTBg');
+      let address: string;
+      try {
+        const response = await Geocoder.from(latitude, longitude);
+        address = response.results[0].formatted_address;
+        console.log('Endereço:', address);
+      } catch (error) {
+        console.error(error);
+        throw new Error('Falha ao converter geolocalização em endereço.');
+      }
       const payload = {
         id_usuario: pedidoEntregue.ID_USUARIO,
         id_pedido: pedidoEntregue.ID_PEDIDO,
         documento: fileBase64,
+        tx_endereco_entrega: address,
       };
 
       const response = await fetch(API_BASE_URL+'Entrega/CriarDocumento', {
