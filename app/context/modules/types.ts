@@ -61,6 +61,7 @@ export type AppState = {
     fotos: Record<number, Fotos>;
     selectedFilial: RetornoFilialDto | null;
     enderecoEntrega: string | null;
+    localizacao: { latitude: number; longitude: number } | null;
 };
 
 export type Action =
@@ -73,7 +74,9 @@ export type Action =
     | { type: 'ADD_FOTO'; payload: { pedidoId: number; tipo: FotoTipo; foto: string } }
     | { type: 'GENERATE_PDF'; payload: number }
     | { type: 'SEND_PEDIDO_ENTREGUE'; payload: PedidoEntregue }
-    | { type: 'UPDATE_PEDIDO_ENTREGUE'; payload: PedidoEntregue };
+    | { type: 'UPDATE_PEDIDO_ENTREGUE'; payload: PedidoEntregue }
+    | { type: 'SET_LOCALIZACAO'; payload: { latitude: number; longitude: number } }
+    | { type: 'SET_ENDERECO_ENTREGA'; payload: string };
 
 export type AppContextType = {
     state: AppState;

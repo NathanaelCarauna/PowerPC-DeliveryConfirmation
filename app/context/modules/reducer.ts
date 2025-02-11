@@ -7,6 +7,8 @@ const initialState: AppState = {
   assinaturas: {},
   fotos: {},
   selectedFilial: null,
+  localizacao: null,
+  enderecoEntrega: null,
 };
 
 export function appReducer(state: AppState, action: any): AppState {
@@ -69,6 +71,16 @@ export function appReducer(state: AppState, action: any): AppState {
     case 'LOGOUT':
       return {
         ...initialState,        
+      };
+    case 'SET_LOCALIZACAO':
+      return {
+        ...state,
+        localizacao: action.payload
+      };
+    case 'SET_ENDERECO_ENTREGA':
+      return {
+        ...state,
+        enderecoEntrega: action.payload
       };
     default:
       console.log("AppContext - Reducer - Ação desconhecida:", action);

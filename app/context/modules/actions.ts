@@ -142,12 +142,44 @@ export const addFoto = (dispatch: Dispatch<Action>) => (pedidoId: number, tipo: 
     });
 };
 
-export const addAssinatura = (dispatch: Dispatch<Action>) => (assinatura: string) => {
-    console.log("AppContext - Adicionando assinatura a todos os pedidos");
-    dispatch({
-        type: 'ADD_ASSINATURA',
-        payload: assinatura,
-    });
+export const addAssinatura = (dispatch: Dispatch<Action>) => async (assinatura: string) => {
+    console.log("AppContext - Adicionando assinatura e obtendo localização");
+    try {
+        // Obter permissão de localização
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+            throw new Error('Permissão de localização necessária');
+        }
+
+        // Obter coordenadas atuais
+        const currentLocation = await Location.getCurrentPositionAsync({});
+        const { latitude, longitude } = currentLocation.coords;
+
+        // Obter endereço
+        Geocoder.init('AIzaSyAG0RaoU3DHxW_rcEpTzxcZHwQ5KYsjTBg');
+        const response = await Geocoder.from(latitude, longitude);
+        const address = response.results[0].formatted_address;
+
+        // Dispatch das ações
+        dispatch({
+            type: 'ADD_ASSINATURA',
+            payload: assinatura,
+        });
+        
+        dispatch({
+            type: 'SET_LOCALIZACAO',
+            payload: { latitude, longitude }
+        });
+
+        dispatch({
+            type: 'SET_ENDERECO_ENTREGA',
+            payload: address
+        });
+
+    } catch (error) {
+        console.error('Erro ao obter localização:', error);
+        throw new Error('Não foi possível obter a localização');
+    }
 };
 
 export const generatePDF = (state: { pedidos: Pedido[], assinaturas: Record<number, string>, fotos: Record<number, { produto?: string, documento?: string, canhoto?: string }> }) => async (pedidoId: number): Promise<string> => {
@@ -359,33 +391,21 @@ export const getFileNameFromUri = (uri: String) => {
   return fileName;
 };
 
-export const sendPedidoEntregue = (dispatch: Dispatch<Action>) => async (pedidoEntregue: PedidoEntregue) => {
+export const sendPedidoEntregue = (dispatch: Dispatch<Action>, getState: () => AppState) => async (pedidoEntregue: PedidoEntregue) => {
     console.log("AppContext - Enviando pedido entregue para o servidor:", pedidoEntregue.ID_PEDIDO);
     const token = await AsyncStorage.getItem('userToken');
+    const state = getState();
+    
     try {
       const fileBase64 = await FileSystem.readAsStringAsync(pedidoEntregue.Documento, {
         encoding: FileSystem.EncodingType.Base64,
       });
-      //const fileBase64 = await RNFS.readFile(pedidoEntregue.Documento, 'base64');
-      const { status } = await Location.requestForegroundPermissionsAsync();  
-      const currentLocation = await Location.getCurrentPositionAsync({});
-      const latitude = currentLocation.coords.latitude;
-      const longitude = currentLocation.coords.longitude;  
-      Geocoder.init('AIzaSyAG0RaoU3DHxW_rcEpTzxcZHwQ5KYsjTBg');
-      let address: string;
-      try {
-        const response = await Geocoder.from(latitude, longitude);
-        address = response.results[0].formatted_address;
-        console.log('Endereço:', address);
-      } catch (error) {
-        console.error(error);
-        throw new Error('Falha ao converter geolocalização em endereço.');
-      }
+
       const payload = {
         id_usuario: pedidoEntregue.ID_USUARIO,
         id_pedido: pedidoEntregue.ID_PEDIDO,
         documento: fileBase64,
-        tx_endereco_entrega: address,
+        tx_endereco_entrega: state.localizacao,
       };
 
       const response = await fetch(API_BASE_URL+'Entrega/CriarDocumento', {
@@ -426,6 +446,6 @@ export const sendPedidoEntregue = (dispatch: Dispatch<Action>) => async (pedidoE
 export const retryPendingPedidos = (dispatch: Dispatch<Action>, getState: () => AppState) => async () => {
     const pendingPedidos = getState().pedidosEntregues.filter(p => p.STATUS === 'PENDENTE');
     for (const pedido of pendingPedidos) {
-        await sendPedidoEntregue(dispatch)(pedido);
+        await sendPedidoEntregue(dispatch, getState)(pedido);
     }
 };

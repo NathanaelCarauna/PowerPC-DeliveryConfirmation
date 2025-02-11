@@ -6,6 +6,8 @@ import { ThemedView } from "@/components/ThemedView";
 import { useRouter } from "expo-router";
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { useAppContext } from './context/appContext';
+import * as Location from 'expo-location';
+import Geocoder from 'react-native-geocoding';
 
 export default function SignatureScreen() {
   const router = useRouter();
@@ -13,6 +15,7 @@ export default function SignatureScreen() {
   const signatureRef = useRef<SignatureViewRef>(null);
   const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
   const [isLoading, setIsLoading] = useState(false);
+  const [endereco, setEndereco] = useState<string | null>(null);
 
   useEffect(() => {
     const setLandscapeOrientation = async () => {
@@ -34,15 +37,34 @@ export default function SignatureScreen() {
     };
   }, []);
 
+  const obterLocalizacao = async () => {
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Erro', 'Permissão de localização necessária');
+        return null;
+      }
+
+      const currentLocation = await Location.getCurrentPositionAsync({});
+      const { latitude, longitude } = currentLocation.coords;
+
+      Geocoder.init('AIzaSyAG0RaoU3DHxW_rcEpTzxcZHwQ5KYsjTBg');
+      const response = await Geocoder.from(latitude, longitude);
+      const address = response.results[0].formatted_address;
+      return address;
+    } catch (error) {
+      console.error('Erro ao obter localização:', error);
+      Alert.alert('Erro', 'Não foi possível obter a localização');
+      return null;
+    }
+  };
+
   const handleSignature = async (signature: string) => {
     if (signature) {
       setIsLoading(true);
       try {
-        // Adicionar a assinatura ao contexto
-        addAssinatura(signature);
-        
-        // Simular uma requisição
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Adicionar a assinatura e obter localização automaticamente
+        await addAssinatura(signature);
         
         // Navegar para a página DeliveryCompleted
         router.dismiss();
