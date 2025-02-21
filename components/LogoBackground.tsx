@@ -8,7 +8,7 @@ export default function LogoBackground({
 }: { 
     showLabel?: boolean;
 }) {
-    const logoSource = require("./assets/images/logo.jpg");
+    const logoSource = require("../assets/images/logo.jpg");
     const externalBackgroundColor = '#d9d9d9';
 
     return (
