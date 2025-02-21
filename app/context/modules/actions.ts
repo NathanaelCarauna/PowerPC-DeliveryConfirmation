@@ -207,12 +207,29 @@ export const generatePDF = (state: { pedidos: Pedido[], assinaturas: Record<numb
 
     console.log("3. Iniciando a conversão da localização para endereço");
 
-    Geocoder.init('AIzaSyAG0RaoU3DHxW_rcEpTzxcZHwQ5KYsjTBg');
+    /*Geocoder.init('Chave da API Google Maps');
     let address: string;
     try {
       const response = await Geocoder.from(latitude, longitude);
       address = response.results[0].formatted_address;
       console.log('Endereço:', address);
+    } catch (error) {
+      console.error(error);
+      throw new Error('Dados insuficientes para gerar o PDF');
+    }*/
+    const apiKey = "IafW9A6gZztdSVswYJ4bYGrQSsGDOz9zZqfViRrgmEk";
+    const url = `https://revgeocode.search.hereapi.com/v1/revgeocode?at=${latitude},${longitude}&lang=pt-BR&apiKey=${apiKey}`;
+    let address: string;
+    try {
+      const responseAPI = await fetch(url);
+      const dataAPI = await responseAPI.json();
+      if (dataAPI.items.length > 0) {
+        address = dataAPI.items[0].address.label;
+        console.log('Endereço:', address);
+      } else {
+        console.error('Nenhum endereço encontrado');
+        throw new Error('Nenhum endereço encontrado');
+      }
     } catch (error) {
       console.error(error);
       throw new Error('Dados insuficientes para gerar o PDF');
