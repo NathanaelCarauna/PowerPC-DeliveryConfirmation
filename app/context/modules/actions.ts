@@ -394,6 +394,7 @@ export const getFileNameFromUri = (uri: String) => {
 export const sendPedidoEntregue = (dispatch: Dispatch<Action>, getState: () => AppState) => async (pedidoEntregue: PedidoEntregue) => {
     console.log("AppContext - Enviando pedido entregue para o servidor:", pedidoEntregue.ID_PEDIDO);
     const token = await AsyncStorage.getItem('userToken');
+    console.log("AppContext - Token:", token);
     const state = getState();
     
     try {
@@ -405,8 +406,10 @@ export const sendPedidoEntregue = (dispatch: Dispatch<Action>, getState: () => A
         id_usuario: pedidoEntregue.ID_USUARIO,
         id_pedido: pedidoEntregue.ID_PEDIDO,
         documento: fileBase64,
-        tx_endereco_entrega: state.localizacao,
+        tx_endereco_entrega: state.enderecoEntrega,
       };
+
+      console.log("AppContext - Enviando request para o servidor:", payload);
 
       const response = await fetch(API_BASE_URL+'Entrega/CriarDocumento', {
         method: 'POST',
@@ -417,11 +420,9 @@ export const sendPedidoEntregue = (dispatch: Dispatch<Action>, getState: () => A
         body: JSON.stringify(payload),
       });
 
-      const textResponse = await response.text();
-      const responseData = textResponse ? JSON.parse(textResponse) : null;
-      console.log("Json resposta: ", responseData);
+      console.log("AppContext - Resposta recebida do servidor:", response);
 
-      if (!responseData || responseData.success) {
+      if (response.status === 200) {
         dispatch({
             type: 'SEND_PEDIDO_ENTREGUE',
             payload: { ...pedidoEntregue, STATUS: 'ENTREGUE' },

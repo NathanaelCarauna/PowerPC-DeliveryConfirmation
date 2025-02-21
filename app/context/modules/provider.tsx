@@ -13,6 +13,8 @@ const initialState: AppState = {
   assinaturas: {},
   fotos: {},
   selectedFilial: null,
+  enderecoEntrega: null,
+  localizacao: null,
 };
 
 export function AppProvider({ children }: { children: ReactNode }) {
@@ -41,7 +43,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     addAssinatura: addAssinatura(dispatch),
     generatePDF: generatePDF(state),
     setSelectedFilial: setSelectedFilial(dispatch),
-    sendPedidoEntregue: sendPedidoEntregue(dispatch),
+    sendPedidoEntregue: sendPedidoEntregue(dispatch, () => state),
   };
 
   return (

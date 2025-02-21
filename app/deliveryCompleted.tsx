@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, Alert, FlatList, TouchableOpacity, Platform } from 'react-native';
+import { View, StyleSheet, Alert, FlatList, TouchableOpacity, Platform, ActivityIndicator } from 'react-native';
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { CustomButton } from "@/components/CustomButtom";
@@ -20,6 +20,7 @@ export default function DeliveryCompleted() {
   const router = useRouter();
   const { state, generatePDF, sendPedidoEntregue } = useAppContext();
   const [isGeneratingPDFs, setIsGeneratingPDFs] = useState(false);
+  const [isSending, setIsSending] = useState(false);
   const [pdfItems, setPdfItems] = useState<PDFItem[]>([]);
 
   useEffect(() => {
@@ -70,6 +71,7 @@ export default function DeliveryCompleted() {
 
   const handleFinish = async () => {
     try {
+      setIsSending(true);
       for (const pedido of state.pedidos) {
         const pdfItem = pdfItems.find(item => item.pedidoId === pedido.ID_PEDIDO);
         if (!pdfItem) {
@@ -86,11 +88,13 @@ export default function DeliveryCompleted() {
         await sendPedidoEntregue(pedidoEntregue);
       }
       
-      Alert.alert('Sucesso', 'Todos os pedidos foram finalizados. Alguns podem estar pendentes de sincronização.');
+      Alert.alert('Sucesso', 'Todos os pedidos foram finalizados.');
       router.replace('/home');
     } catch (error) {
-      // console.error("Erro ao finalizar pedidos:", error);
-      Alert.alert('Erro', 'Ocorreu um erro ao finalizar os pedidos. Eles serão sincronizados posteriormente.');
+      console.error("Erro ao finalizar pedidos:", error);
+      Alert.alert('Erro', 'Ocorreu um erro ao finalizar os pedidos.');
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -114,6 +118,11 @@ export default function DeliveryCompleted() {
       
       {isGeneratingPDFs ? (
         <ThemedText style={styles.loadingText}>Gerando PDFs...</ThemedText>
+      ) : isSending ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#007bff" />
+          <ThemedText style={styles.loadingText}>Enviando pedidos...</ThemedText>
+        </View>
       ) : (
         <FlatList
           data={pdfItems}
@@ -124,10 +133,10 @@ export default function DeliveryCompleted() {
       )}
       
       <CustomButton
-        title="Finalizar"
+        title={isSending ? "Processando..." : "Finalizar"}
         onPress={handleFinish}
         style={styles.button}
-        disabled={isGeneratingPDFs}
+        disabled={isGeneratingPDFs || isSending}
       />
     </ThemedView>
   );
@@ -151,10 +160,16 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 30,
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
   loadingText: {
     fontSize: 16,
-    marginBottom: 20,
-    textAlign: 'center', // Centraliza o texto de carregamento
+    marginTop: 10,
+    textAlign: 'center',
     color: '#555',
   },
   pdfList: {
