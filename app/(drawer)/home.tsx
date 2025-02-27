@@ -15,7 +15,7 @@ function DrawerButton() {
   const navigation = useNavigation();
   return (
     <TouchableOpacity onPress={() => navigation.openDrawer()} style={{ marginLeft: 15 }}>
-      <Image source={require('../../assets/menu-icon.png')} style={{ width: 24, height: 24 }} />
+      <Image source={require('../../assets/images/menu-icon.png')} style={{ width: 24, height: 24 }} />
     </TouchableOpacity>
   );
 }
