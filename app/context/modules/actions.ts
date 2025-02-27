@@ -217,7 +217,7 @@ export const generatePDF = (state: { pedidos: Pedido[], assinaturas: Record<numb
       console.error(error);
       throw new Error('Dados insuficientes para gerar o PDF');
     }*/
-    const apiKey = "IafW9A6gZztdSVswYJ4bYGrQSsGDOz9zZqfViRrgmEk";
+    const apiKey = "8xXTiyNPDO54MwjsVl3HglaLro11N0yIv47xdq68228";
     const url = `https://revgeocode.search.hereapi.com/v1/revgeocode?at=${latitude},${longitude}&lang=pt-BR&apiKey=${apiKey}`;
     let address: string;
     try {
