@@ -1,6 +1,5 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
 import { Drawer } from 'expo-router/drawer'; // Importar o Drawer do expo-router/drawer
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
@@ -8,27 +7,37 @@ import 'react-native-reanimated';
 import { GestureHandlerRootView } from 'react-native-gesture-handler'; // Importar GestureHandlerRootView
 
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { AppProvider } from '../context/appContext';
 import { useAppContext } from '../context/appContext'; // Importe o hook useAppContext
-import { useRouter } from 'expo-router'; // Importe o hook useRouter
+import { useRouter, useNavigation } from 'expo-router'; // Importe o hook useRouter e useNavigation
+import { TouchableOpacity, Image } from 'react-native';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
+// Botão do menu Drawer
+function DrawerButton() {
+  const navigation = useNavigation();
+  return (
+    <TouchableOpacity onPress={() => navigation.openDrawer()} style={{ marginLeft: 15 }}>
+      <Image source={require('../../assets/menu-icon.png')} style={{ width: 24, height: 24 }} />
+    </TouchableOpacity>
+  );
+}
+
+// Custom Drawer Content
 import {
   DrawerContentScrollView,
   DrawerItemList,
   DrawerItem,
-} from '@react-navigation/drawer'; // Importar DrawerItem e DrawerContentScrollView
-import { Linking } from 'react-native'; // Importar Linking para abrir URLs
+} from '@react-navigation/drawer';
 
 function CustomDrawerContent(props: any) {
-  const { logout } = useAppContext(); // Use o hook useAppContext para obter a função de logout
-  const router = useRouter(); // Use o hook useRouter para navegação
+  const { logout } = useAppContext();
+  const router = useRouter();
 
   const handleLogout = async () => {
-    await logout(); // Chame a função de logout
-    router.replace('/'); // Redirecione para a tela de login (index)
+    await logout();
+    router.replace('/'); // Redireciona para a tela de login
   };
 
   const handleFilialSelection = () => {
@@ -38,14 +47,8 @@ function CustomDrawerContent(props: any) {
   return (
     <DrawerContentScrollView {...props}>
       <DrawerItemList {...props} />
-      <DrawerItem
-        label="Trocar Filial"
-        onPress={handleFilialSelection}
-      />
-      <DrawerItem
-        label="Sair"
-        onPress={handleLogout} // Use a nova função handleLogout
-      />
+      <DrawerItem label="Trocar Filial" onPress={handleFilialSelection} />
+      <DrawerItem label="Sair" onPress={handleLogout} />
     </DrawerContentScrollView>
   );
 }
@@ -69,12 +72,28 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <Drawer
-          drawerContent={(props) => <CustomDrawerContent {...props} />}
-        >
-          <Drawer.Screen name="home" options={{ headerShown: false, drawerLabel: 'Realizar entrega', title: 'overview' }} />
-          <Drawer.Screen name="deliveries" options={{ headerShown: false, drawerLabel: 'Minhas entregas', title: 'overview' }} />
-          {/* <Drawer.Screen name="changeFilial" options={{ headerShown: false, drawerLabel: 'Trocar filial', title: 'overview' }} />             */}
+        <Drawer drawerContent={(props) => <CustomDrawerContent {...props} />}>
+          {/* Tela Home com botão de menu */}
+          <Drawer.Screen 
+            name="home" 
+            options={{ 
+              headerShown: true, 
+              headerLeft: () => <DrawerButton />, 
+              drawerLabel: 'Realizar entrega', 
+              title: 'Home' 
+            }} 
+          />
+
+          {/* Tela Deliveries agora também tem o botão do Drawer */}
+          <Drawer.Screen 
+            name="deliveries" 
+            options={{ 
+              headerShown: true, 
+              headerLeft: () => <DrawerButton />, 
+              drawerLabel: 'Minhas entregas', 
+              title: 'Minhas Entregas' 
+            }} 
+          />
         </Drawer>
       </GestureHandlerRootView>
     </ThemeProvider>
