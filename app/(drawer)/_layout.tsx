@@ -80,7 +80,12 @@ export default function RootLayout() {
               headerShown: true, 
               headerLeft: () => <DrawerButton />, 
               drawerLabel: 'Realizar entrega', 
-              title: 'Home' 
+              title: '',
+              headerStyle:{
+                backgroundColor: 'transparent',
+                elevation: 0,
+                shadowOpacity: 0
+              } 
             }} 
           />
 
@@ -91,7 +96,12 @@ export default function RootLayout() {
               headerShown: true, 
               headerLeft: () => <DrawerButton />, 
               drawerLabel: 'Minhas entregas', 
-              title: 'Minhas Entregas' 
+              title: '',
+              headerStyle:{
+                backgroundColor: 'transparent',
+                elevation: 0,
+                shadowOpacity: 0
+              } 
             }} 
           />
         </Drawer>
