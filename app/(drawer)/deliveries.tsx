@@ -1,17 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Alert, ActivityIndicator, Keyboard } from 'react-native';
+import { StyleSheet, View, Alert, ActivityIndicator, Keyboard, TouchableOpacity, Image } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { CustomButton } from "@/components/CustomButtom";
 import LogoBackground from "@/components/LogoBackground";
 import { ThemedInputText } from "@/components/ThemedTextInput";
 import { ThemedView } from "@/components/ThemedView";
-import { useRouter } from "expo-router";
+import { useRouter, useNavigation } from "expo-router"; // Adicionado useNavigation
 import { useAppContext } from '../context/appContext';
 import { ThemedTableDeliveries } from '@/components/ThemedTableDeliveries';
 import { PedidoEntregue } from '../context/modules/types';
 
+// Botão para abrir o Drawer
+function DrawerButton() {
+  const navigation = useNavigation();
+  return (
+    <TouchableOpacity onPress={() => navigation.openDrawer()} style={{ marginLeft: 15 }}>
+      <Image source={require('../../assets/images/menu-icon.png')} style={{ width: 24, height: 24 }} />
+    </TouchableOpacity>
+  );
+}
+
 export default function Deliveries() {
   const router = useRouter();  
+  const navigation = useNavigation(); // Adicionando acesso à navegação
   const { state, fetchPedido, removePedido, getPedidosEntregues, retryPendingPedidos } = useAppContext();
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -22,6 +33,12 @@ export default function Deliveries() {
     setPedidosEntregues(pedidos);
   }, [state.pedidosEntregues]);
 
+  useEffect(() => {
+    navigation.setOptions({
+      headerLeft: () => <DrawerButton />,
+    });
+  }, [navigation]);
+
   const handleSearch = async (searchQuery: string) => {
     console.log("Home - Iniciando busca de pedido:", searchQuery);
     const pedidoId = parseInt(searchQuery, 10);
@@ -31,7 +48,6 @@ export default function Deliveries() {
       return;
     }
 
-    // Verifica se o pedido já existe na lista
     const pedidoExistente = state.pedidos.find(p => p.ID_PEDIDO === pedidoId);
     if (pedidoExistente) {
       console.log("Home - Pedido já existe na lista:", pedidoId);

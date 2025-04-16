@@ -1,13 +1,14 @@
 import { ThemedText } from "./ThemedText";
 import { ThemedView } from "./ThemedView";
+import { Image } from "react-native";
+
 
 export default function LogoBackground({ 
     showLabel = true, 
-    labelText = "PowerPC" 
 }: { 
     showLabel?: boolean;
-    labelText?: string;
 }) {
+    const logoSource = require("../assets/images/logo.jpg");
     const externalBackgroundColor = '#d9d9d9';
 
     return (
@@ -32,9 +33,10 @@ export default function LogoBackground({
                     borderRadius: 180, 
                 }}
             >
-                {showLabel && (
-                    <ThemedText style={{ fontWeight: '900', fontSize: 18 }}>{labelText}</ThemedText>
-                )}
+                <Image 
+                    source={logoSource} 
+                    style={{ width: 100, height: 100, resizeMode: "contain" }} 
+                />
             </ThemedView>
         </ThemedView>
     );
